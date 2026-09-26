@@ -1,10 +1,7 @@
-// Base URL of the Django backend. Empty when the frontend is served from the
-// same origin (local compose setup); set to e.g. https://staging.example.com
-// when the frontend is served from the static CDN host.
-export const API_BASE: string = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+import { getConfig } from '../config'
 
 export function apiUrl(path: string): string {
-  return `${API_BASE}${path}`
+  return `${getConfig().apiBaseUrl}${path}`
 }
 
 export class ApiError extends Error {
