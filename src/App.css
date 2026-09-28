@@ -182,3 +182,76 @@
     border-right-color: var(--border);
   }
 }
+
+.recipe-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 32px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+
+  a {
+    display: block;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: inherit;
+    text-decoration: none;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: var(--shadow);
+    }
+  }
+
+  h3 {
+    margin: 0 0 12px;
+    color: var(--text-h);
+  }
+}
+
+.recipe-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 24px;
+  margin: 0;
+
+  dt {
+    font-size: 14px;
+  }
+  dd {
+    margin: 0;
+    color: var(--text-h);
+  }
+}
+
+.recipe-detail {
+  text-align: left;
+  max-width: 720px;
+  margin: 0 auto 32px;
+  padding: 0 20px;
+
+  h2 {
+    margin-top: 16px;
+  }
+  .recipe-meta {
+    justify-content: flex-start;
+    margin-bottom: 24px;
+  }
+  h3 {
+    color: var(--text-h);
+    margin: 24px 0 8px;
+  }
+  p + p {
+    margin-top: 8px;
+  }
+}
+
+.recipe-back {
+  color: var(--accent);
+  text-decoration: none;
+}

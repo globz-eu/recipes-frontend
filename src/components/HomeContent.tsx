@@ -1,5 +1,6 @@
 import { apiUrl, resetCsrfToken } from '../api/client'
 import type { HomePage } from '../api/home'
+import { RecipeList } from './RecipeList'
 
 interface HomeContentProps {
   pages: HomePage[]
@@ -14,6 +15,7 @@ export function HomeContent({ pages }: HomeContentProps) {
           {page.description && <p>{page.description}</p>}
         </article>
       ))}
+      <RecipeList />
       <footer>
         <a
           href={apiUrl(`/admin/logout/?next=${encodeURIComponent(window.location.href)}`)}
