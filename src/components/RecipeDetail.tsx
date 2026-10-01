@@ -5,7 +5,7 @@ interface RecipeDetailProps {
   recipe: Recipe
 }
 
-// ingredients and preparation are HTML produced by Wagtail's rich text
+// preparation is HTML produced by Wagtail's rich text
 // editor, which only lets editors enter whitelisted markup.
 export function RecipeDetail({ recipe }: RecipeDetailProps) {
   return (
@@ -15,10 +15,18 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
       </a>
       <h2>{recipe.title}</h2>
       <RecipeMeta recipe={recipe} />
-      {recipe.ingredients && (
+      {recipe.ingredients.length > 0 && (
         <section>
           <h3>Ingredients</h3>
-          <div dangerouslySetInnerHTML={{ __html: recipe.ingredients }} />
+          <ul>
+            {recipe.ingredients.map((ingredient, index) => (
+              <li key={index}>
+                {[ingredient.quantity, ingredient.unit, ingredient.name]
+                  .filter((part) => part !== null && part !== '')
+                  .join(' ')}
+              </li>
+            ))}
+          </ul>
         </section>
       )}
       {recipe.preparation && (

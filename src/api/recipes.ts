@@ -1,11 +1,17 @@
 import { apiFetch } from './client'
 
+export interface Ingredient {
+  quantity: number | null
+  unit: string
+  name: string
+}
+
 export interface Recipe {
   id: number
   title: string
   slug: string
+  ingredients: Ingredient[]
   // HTML rendered by the backend from the Wagtail rich text editor.
-  ingredients: string
   preparation: string
   // Minutes.
   preparation_time: number | null
