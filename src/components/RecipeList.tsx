@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSyncExternalStore } from 'react'
-import { fetchRecipes, recipesQueryKey } from '../api/recipes'
+import { fetchRecipes, recipesQueryKey, type Recipe } from '../api/recipes'
 import { RecipeDetail } from './RecipeDetail'
 import { RecipeMeta } from './RecipeMeta'
 
@@ -11,17 +11,22 @@ function subscribeToHash(callback: () => void) {
   return () => window.removeEventListener('hashchange', callback)
 }
 
-function getSelectedSlug(): string | null {
+// Slugs are only unique per locale, so the hash is `#recipe-<locale>-<slug>`.
+function recipeHash(recipe: Recipe): string {
+  return `${HASH_PREFIX}${recipe.locale}-${encodeURIComponent(recipe.slug)}`
+}
+
+function getSelectedHash(): string | null {
   const { hash } = window.location
-  return hash.startsWith(HASH_PREFIX) ? decodeURIComponent(hash.slice(HASH_PREFIX.length)) : null
+  return hash.startsWith(HASH_PREFIX) ? hash : null
 }
 
 export function RecipeList() {
-  const { data: recipes, isPending, error } = useQuery({
+  const { data, isPending, error } = useQuery({
     queryKey: recipesQueryKey,
     queryFn: fetchRecipes,
   })
-  const selectedSlug = useSyncExternalStore(subscribeToHash, getSelectedSlug)
+  const selectedHash = useSyncExternalStore(subscribeToHash, getSelectedHash)
 
   if (isPending) {
     return <p>Loading recipes...</p>
@@ -31,28 +36,36 @@ export function RecipeList() {
     return <p>Error loading recipes: {error.message}</p>
   }
 
-  const selected = recipes.find((recipe) => recipe.slug === selectedSlug)
+  const groups = Object.entries(data.locales).filter(([, recipes]) => recipes.length > 0)
+
+  const selected = groups
+    .flatMap(([, recipes]) => recipes)
+    .find((recipe) => recipeHash(recipe) === selectedHash)
   if (selected) {
     return <RecipeDetail recipe={selected} />
   }
 
-  if (recipes.length === 0) {
+  if (groups.length === 0) {
     return <p>No recipes yet.</p>
   }
 
   return (
-    <section className="recipe-list">
-      <h2>Recipes</h2>
-      <ul>
-        {recipes.map((recipe) => (
-          <li key={recipe.id}>
-            <a href={`${HASH_PREFIX}${encodeURIComponent(recipe.slug)}`}>
-              <h3>{recipe.title}</h3>
-              <RecipeMeta recipe={recipe} />
-            </a>
-          </li>
-        ))}
-      </ul>
-    </section>
+    <>
+      {groups.map(([locale, recipes]) => (
+        <section className="recipe-list" key={locale}>
+          <h2>Recipes ({locale.toUpperCase()})</h2>
+          <ul>
+            {recipes.map((recipe) => (
+              <li key={recipe.id}>
+                <a href={recipeHash(recipe)}>
+                  <h3>{recipe.title}</h3>
+                  <RecipeMeta recipe={recipe} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </>
   )
 }
