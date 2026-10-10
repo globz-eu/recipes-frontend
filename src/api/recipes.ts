@@ -10,6 +10,8 @@ export interface Recipe {
   id: number
   title: string
   slug: string
+  locale: string
+  translation_key: string
   ingredients: Ingredient[]
   // HTML rendered by the backend from the Wagtail rich text editor.
   preparation: string
@@ -21,6 +23,11 @@ export interface Recipe {
 
 export const recipesQueryKey = ['recipes'] as const
 
-export function fetchRecipes(): Promise<Recipe[]> {
-  return apiFetch<Recipe[]>('/api/recipes/')
+// Without ?locale= the API groups all recipes by locale code.
+export interface RecipesByLocale {
+  locales: Record<string, Recipe[]>
+}
+
+export function fetchRecipes(): Promise<RecipesByLocale> {
+  return apiFetch<RecipesByLocale>('/api/recipes/')
 }
