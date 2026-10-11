@@ -16,6 +16,13 @@ export class ApiError extends Error {
   }
 }
 
+// The CMS answers authenticated users without a role with 403 and code "no_access".
+export function isNoAccessError(error: unknown): boolean {
+  if (!(error instanceof ApiError) || error.status !== 403) return false
+  const body = error.body
+  return typeof body === 'object' && body !== null && (body as { code?: unknown }).code === 'no_access'
+}
+
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 interface RequestOptions {
