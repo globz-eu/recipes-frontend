@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { ApiError } from './api/client'
+import { ApiError, isNoAccessError } from './api/client'
 import { homeQueryKey, fetchHome } from './api/home'
 import { HomeContent } from './components/HomeContent'
 import { LoginPrompt } from './components/LoginPrompt'
+import { NoAccessPrompt } from './components/NoAccessPrompt'
 import './App.css'
 
 function App() {
@@ -19,6 +20,10 @@ function App() {
 
   if (isPending) {
     return <main><p>Loading...</p></main>
+  }
+
+  if (isNoAccessError(error)) {
+    return <main><NoAccessPrompt /></main>
   }
 
   if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
