@@ -312,6 +312,13 @@
     }
   }
 
+  .home-description {
+    margin: 2px 0 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--text);
+  }
+
   .language-switch {
     padding: 0;
   }

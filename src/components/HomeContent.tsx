@@ -16,9 +16,14 @@ export function HomeContent({ pages, locale, onLocaleChange }: HomeContentProps)
       <header className="home-header">
         <div>
           {pages.map((page, index) => (
-            <h1 key={index} title={page.description || undefined}>
-              <a href="#">{page.title}</a>
-            </h1>
+            <div key={index}>
+              <h1>
+                <a href="#">{page.title}</a>
+              </h1>
+              {page.description && (
+                <p className="home-description">{page.description}</p>
+              )}
+            </div>
           ))}
         </div>
         <div className="home-actions">
