@@ -316,3 +316,15 @@
     padding: 0;
   }
 }
+
+.recipe-lang {
+  margin-left: 8px;
+  padding: 1px 6px;
+  font-size: 12px;
+  font-weight: 400;
+  text-transform: uppercase;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  vertical-align: middle;
+}
