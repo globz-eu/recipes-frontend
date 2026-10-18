@@ -9,12 +9,11 @@ function formatMinutes(minutes: number): string {
 
 interface RecipeMetaProps {
   recipe: Recipe
-  showServes?: boolean
 }
 
-export function RecipeMeta({ recipe, showServes = true }: RecipeMetaProps) {
+export function RecipeMeta({ recipe }: RecipeMetaProps) {
   const items: [string, string][] = []
-  if (showServes && recipe.number_of_people != null) {
+  if (recipe.number_of_people != null) {
     items.push(['Serves', String(recipe.number_of_people)])
   }
   if (recipe.preparation_time != null) {

@@ -3,7 +3,6 @@ import { useSyncExternalStore } from 'react'
 import { fetchRecipes, recipesQueryKey, type Recipe } from '../api/recipes'
 import { LOCALES, type LocaleCode } from '../locale'
 import { RecipeDetail } from './RecipeDetail'
-import { RecipeMeta } from './RecipeMeta'
 
 const HASH_PREFIX = '#recipe-'
 
@@ -76,7 +75,6 @@ export function RecipeList({ locale }: { locale: LocaleCode }) {
                   </span>
                 )}
               </h3>
-              <RecipeMeta recipe={recipe} showServes={false} />
             </a>
           </li>
         ))}
