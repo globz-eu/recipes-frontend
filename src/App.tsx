@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { ApiError, isNoAccessError } from './api/client'
 import { homeQueryKey, fetchHome } from './api/home'
 import { HomeContent } from './components/HomeContent'
@@ -19,6 +19,8 @@ function App() {
   const { data, isPending, error } = useQuery({
     queryKey: homeQueryKey(locale),
     queryFn: () => fetchHome(locale),
+    // Keep the UI mounted while another locale loads.
+    placeholderData: keepPreviousData,
     retry: (failureCount, err) => {
       if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
         return false
