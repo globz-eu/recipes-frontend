@@ -348,3 +348,11 @@
     outline-offset: 2px;
   }
 }
+
+.dev-login-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
