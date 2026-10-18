@@ -13,13 +13,16 @@ interface HomeContentProps {
 export function HomeContent({ pages, locale, onLocaleChange }: HomeContentProps) {
   return (
     <div className="home-content">
-      <LanguageSwitch locale={locale} onChange={onLocaleChange} />
-      {pages.map((page, index) => (
-        <article key={index}>
-          <h1>{page.title}</h1>
-          {page.description && <p>{page.description}</p>}
-        </article>
-      ))}
+      <header className="home-header">
+        <div>
+          {pages.map((page, index) => (
+            <h1 key={index} title={page.description || undefined}>
+              <a href="#">{page.title}</a>
+            </h1>
+          ))}
+        </div>
+        <LanguageSwitch locale={locale} onChange={onLocaleChange} />
+      </header>
       <RecipeList locale={locale} />
       <footer>
         <a

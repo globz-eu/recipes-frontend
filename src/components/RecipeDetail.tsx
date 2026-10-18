@@ -10,9 +10,6 @@ interface RecipeDetailProps {
 export function RecipeDetail({ recipe }: RecipeDetailProps) {
   return (
     <article className="recipe-detail">
-      <a href="#" className="recipe-back">
-        ← All recipes
-      </a>
       <h2>{recipe.title}</h2>
       <RecipeMeta recipe={recipe} />
       {recipe.ingredients.length > 0 && (
