@@ -5,8 +5,10 @@ export interface HomePage {
   description: string | null
 }
 
-export const homeQueryKey = ['home'] as const
+// Prefix shared by all locales, for invalidating every home query at once.
+export const homeQueryKeyPrefix = ['home'] as const
+export const homeQueryKey = (locale: string) => [...homeQueryKeyPrefix, locale] as const
 
-export function fetchHome(): Promise<HomePage[]> {
-  return apiFetch<HomePage[]>('/api/home/')
+export function fetchHome(locale: string): Promise<HomePage[]> {
+  return apiFetch<HomePage[]>(`/api/home/?locale=${encodeURIComponent(locale)}`)
 }

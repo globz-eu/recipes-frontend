@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { ApiError, apiPost, resetCsrfToken } from '../api/client'
-import { homeQueryKey } from '../api/home'
+import { homeQueryKeyPrefix } from '../api/home'
 
 // Dev-only: signs in a local user created by recipes-cms `ensure_users`. It is
 // rendered only when `import.meta.env.DEV` is true, so production builds drop it.
@@ -18,7 +18,7 @@ export function DevLoginForm() {
       await apiPost('/api/dev-login/', { username, password })
       // The session (and with it the CSRF token) changed on login.
       resetCsrfToken()
-      await queryClient.invalidateQueries({ queryKey: homeQueryKey })
+      await queryClient.invalidateQueries({ queryKey: homeQueryKeyPrefix })
     } catch (err) {
       setError(err instanceof ApiError && err.status === 400 ? 'Invalid username or password.' : 'Login failed.')
     }

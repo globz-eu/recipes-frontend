@@ -1,15 +1,24 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ApiError, isNoAccessError } from './api/client'
 import { homeQueryKey, fetchHome } from './api/home'
 import { HomeContent } from './components/HomeContent'
 import { LoginPrompt } from './components/LoginPrompt'
 import { NoAccessPrompt } from './components/NoAccessPrompt'
+import { getInitialLocale, storeLocale, type LocaleCode } from './locale'
 import './App.css'
 
 function App() {
+  const [locale, setLocale] = useState<LocaleCode>(getInitialLocale)
+  const changeLocale = (next: LocaleCode) => {
+    storeLocale(next)
+    // A recipe open in the previous language does not exist in the new one.
+    if (window.location.hash) window.location.hash = ''
+    setLocale(next)
+  }
   const { data, isPending, error } = useQuery({
-    queryKey: homeQueryKey,
-    queryFn: fetchHome,
+    queryKey: homeQueryKey(locale),
+    queryFn: () => fetchHome(locale),
     retry: (failureCount, err) => {
       if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
         return false
@@ -34,7 +43,7 @@ function App() {
     return <main><p>Error loading content: {error.message}</p></main>
   }
 
-  return <main><HomeContent pages={data} /></main>
+  return <main><HomeContent pages={data} locale={locale} onLocaleChange={changeLocale} /></main>
 }
 
 export default App

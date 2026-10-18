@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useSyncExternalStore } from 'react'
 import { fetchRecipes, recipesQueryKey, type Recipe } from '../api/recipes'
+import type { LocaleCode } from '../locale'
 import { RecipeDetail } from './RecipeDetail'
 import { RecipeMeta } from './RecipeMeta'
 
@@ -21,7 +22,7 @@ function getSelectedHash(): string | null {
   return hash.startsWith(HASH_PREFIX) ? hash : null
 }
 
-export function RecipeList() {
+export function RecipeList({ locale }: { locale: LocaleCode }) {
   const { data, isPending, error } = useQuery({
     queryKey: recipesQueryKey,
     queryFn: fetchRecipes,
@@ -36,7 +37,9 @@ export function RecipeList() {
     return <p>Error loading recipes: {error.message}</p>
   }
 
-  const groups = Object.entries(data.locales).filter(([, recipes]) => recipes.length > 0)
+  const groups = Object.entries(data.locales).filter(
+    ([code, recipes]) => code === locale && recipes.length > 0,
+  )
 
   const selected = groups
     .flatMap(([, recipes]) => recipes)
@@ -51,15 +54,15 @@ export function RecipeList() {
 
   return (
     <>
-      {groups.map(([locale, recipes]) => (
-        <section className="recipe-list" key={locale}>
-          <h2>Recipes ({locale.toUpperCase()})</h2>
+      {groups.map(([code, recipes]) => (
+        <section className="recipe-list" key={code}>
+          <h2>Recipes</h2>
           <ul>
             {recipes.map((recipe) => (
               <li key={recipe.id}>
                 <a href={recipeHash(recipe)}>
                   <h3>{recipe.title}</h3>
-                  <RecipeMeta recipe={recipe} />
+                  <RecipeMeta recipe={recipe} showServes={false} />
                 </a>
               </li>
             ))}
