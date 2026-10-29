@@ -38,12 +38,33 @@ function pairedDevServerPort(cmsPort: number) {
   return port
 }
 
+// Reads a backend origin (http[s]://host[:port], nothing after it) from env; undefined
+// when the variable is unset or empty.
+function readOrigin(env: Record<string, string>, name: string) {
+  const raw = env[name]?.trim()
+  if (!raw) return undefined
+  const fail = () =>
+    new Error(`${name} must be an http(s) origin like https://cms.example.com, got "${raw}"`)
+  let url: URL
+  try {
+    url = new URL(raw)
+  } catch {
+    throw fail()
+  }
+  const bare = url.pathname === '/' && !url.search && !url.hash
+  if (!['http:', 'https:'].includes(url.protocol) || !bare || url.username || url.password) {
+    throw fail()
+  }
+  return url.origin
+}
+
 // Prints the proxy target when the dev server starts (not for vite build).
-function logProxyTarget(target: string): Plugin {
+function logProxyTarget(target: string, warning?: string): Plugin {
   return {
     name: 'log-proxy-target',
     configureServer(server) {
       server.config.logger.info(`  recipes-cms proxy target: ${target}`)
+      if (warning) server.config.logger.warn(`  ${warning}`)
     },
   }
 }
@@ -57,20 +78,33 @@ export default defineConfig(({ command, mode }) => {
   // The proxy settings are config-only, so they carry no VITE_ prefix and never reach
   // the client bundle. Reads .env, .env.local, .env.[mode][.local] and the shell environment.
   const env = loadEnv(mode, process.cwd(), '')
-  const cmsPort = readPort(env, 'RECIPES_CMS_PORT') ?? defaultCmsPort
-  const target = `http://localhost:${cmsPort}`
+  const cmsPort = readPort(env, 'RECIPES_CMS_PORT')
+  // RECIPES_CMS_URL (any backend, e.g. a remote one) takes precedence over RECIPES_CMS_PORT
+  // (a local stack on http://localhost:<port>).
+  const cmsUrl = readOrigin(env, 'RECIPES_CMS_URL')
+  const target = cmsUrl ?? `http://localhost:${cmsPort ?? defaultCmsPort}`
+  const warning =
+    cmsUrl && cmsPort !== undefined
+      ? 'RECIPES_CMS_PORT is ignored because RECIPES_CMS_URL is set'
+      : undefined
   // Stack 8080 pairs with dev server 5173, 8081 with 5174, ... (recipes-cms trusts the
-  // paired origin for CSRF). The port is pinned: a silent move would fail every POST.
+  // paired origin for CSRF). With RECIPES_CMS_URL there is no stack port to pair with, so
+  // the default is 5173. The port is pinned: a silent move would fail every POST.
   const devServerPort =
-    readPort(env, 'DEV_SERVER_PORT') ?? pairedDevServerPort(cmsPort)
+    readPort(env, 'DEV_SERVER_PORT') ??
+    (cmsUrl ? defaultDevServerPort : pairedDevServerPort(cmsPort ?? defaultCmsPort))
+  // A local stack's nginx ignores the incoming port (it sends X-Forwarded-Host with its own),
+  // so its proxy keeps the dev server's Host; another backend needs its own Host to match its
+  // virtual host, ALLOWED_HOSTS and TLS certificate.
+  const proxyOptions = { target, changeOrigin: Boolean(cmsUrl) }
 
   return {
-    plugins: [react(), logProxyTarget(target)],
+    plugins: [react(), logProxyTarget(target, warning)],
     base: '/frontend/',
     server: {
       port: devServerPort,
       strictPort: true,
-      proxy: Object.fromEntries(proxiedPaths.map((path) => [path, target])),
+      proxy: Object.fromEntries(proxiedPaths.map((path) => [path, proxyOptions])),
     },
   }
 })
