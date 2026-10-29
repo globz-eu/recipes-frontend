@@ -1,19 +1,24 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// Paths the dev server forwards to recipes-cms.
+const proxiedPaths = [
+  '/api',
+  '/api-auth',
+  '/login',
+  '/complete',
+  '/disconnect',
+  '/admin',
+  '/media',
+]
+
+const target = 'http://localhost:8080'
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   base: '/frontend/',
   server: {
-    proxy: {
-      '/api': 'http://localhost:8080',
-      '/api-auth': 'http://localhost:8080',
-      '/login': 'http://localhost:8080',
-      '/complete': 'http://localhost:8080',
-      '/disconnect': 'http://localhost:8080',
-      '/admin': 'http://localhost:8080',
-      '/media': 'http://localhost:8080',
-    },
+    proxy: Object.fromEntries(proxiedPaths.map((path) => [path, target])),
   },
 })
