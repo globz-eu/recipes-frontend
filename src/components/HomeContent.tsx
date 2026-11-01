@@ -1,5 +1,6 @@
-import { apiUrl, resetCsrfToken } from '../api/client'
+import { resetCsrfToken } from '../api/client'
 import type { HomePage } from '../api/home'
+import { logoutUrl } from '../auth/urls'
 import type { LocaleCode } from '../locale'
 import { LanguageSwitch } from './LanguageSwitch'
 import { RecipeList } from './RecipeList'
@@ -30,9 +31,7 @@ export function HomeContent({ pages, locale, onLocaleChange }: HomeContentProps)
           <LanguageSwitch locale={locale} onChange={onLocaleChange} />
           <a
             className="logout"
-            href={apiUrl(
-              `/admin/logout/?next=${encodeURIComponent(window.location.href)}`,
-            )}
+            href={logoutUrl()}
             onClick={resetCsrfToken}
             aria-label="Log out"
             title="Log out"
