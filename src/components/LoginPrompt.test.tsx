@@ -105,4 +105,31 @@ describe('LoginPrompt', () => {
     await screen.findAllByRole('link')
     expect(screen.queryByText('dev login')).not.toBeInTheDocument()
   })
+
+  it('shows the dev login form in dev mode', async () => {
+    stubFetch(true, { providers })
+    vi.stubEnv('DEV', true)
+    renderWithQuery(<LoginPrompt />)
+    expect(screen.getByText('dev login')).toBeInTheDocument()
+    await screen.findAllByRole('link')
+  })
+
+  it('does not accumulate auth_error in the login next URL', async () => {
+    stubFetch(true, { providers })
+    window.history.pushState(null, '', '/frontend/?auth_error=email_in_use&x=1#h')
+    renderWithQuery(<LoginPrompt />)
+    const links = await screen.findAllByRole('link')
+    const next = encodeURIComponent(`${window.location.origin}/frontend/?x=1#h`)
+    expect(links[0]).toHaveAttribute('href', `https://cms.example/login/zitadel/?next=${next}`)
+    expect(links[0].getAttribute('href')).not.toContain('auth_error')
+  })
+
+  it('shows no error message and leaves the URL alone without auth_error', async () => {
+    stubFetch(true, { providers })
+    const replace = vi.spyOn(window.history, 'replaceState')
+    renderWithQuery(<LoginPrompt />)
+    await screen.findAllByRole('link')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(replace).not.toHaveBeenCalled()
+  })
 })

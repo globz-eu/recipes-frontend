@@ -77,3 +77,35 @@ describe('AUTH_ERROR_MESSAGES', () => {
     ])
   })
 })
+
+describe('edge cases', () => {
+  it('frontendRootUrl follows a different base path', () => {
+    vi.stubEnv('BASE_URL', '/')
+    expect(frontendRootUrl()).toBe(`${window.location.origin}/`)
+  })
+
+  it('logoutUrl is relative to the origin when apiBaseUrl is configured as same-origin', async () => {
+    vi.resetModules()
+    vi.doMock('../config', () => ({ getConfig: () => ({ apiBaseUrl: '' }) }))
+    const mod = await import('./urls')
+    expect(mod.logoutUrl()).toBe(
+      `/admin/logout/?next=${encodeURIComponent(`${window.location.origin}/frontend/`)}`,
+    )
+    vi.doUnmock('../config')
+  })
+
+  it('loginNextUrl removes every repeated auth_error', () => {
+    setLocation('/frontend/?auth_error=a&auth_error=b&x=1')
+    expect(loginNextUrl()).toBe(`${window.location.origin}/frontend/?x=1`)
+  })
+
+  it('loginNextUrl drops the query separator when auth_error was the only param', () => {
+    setLocation('/frontend/?auth_error=login_failed#h')
+    expect(loginNextUrl()).toBe(`${window.location.origin}/frontend/#h`)
+  })
+
+  it('an empty auth_error value counts as login_failed', () => {
+    setLocation('/frontend/?auth_error=')
+    expect(authErrorFromLocation()).toBe('login_failed')
+  })
+})
