@@ -10,10 +10,12 @@ The import above is the shared recipes architecture file; it resolves only if `~
 
 ```bash
 npm ci
-npm run dev     # vite dev server; proxies /api, /login, /complete, /disconnect, /admin, /media to recipes-cms on http://localhost:8080
+npm run dev     # vite dev server; proxies /api, /api-auth, /login, /complete, /disconnect, /admin, /media to recipes-cms (default http://localhost:8080)
 npm run lint    # eslint .
 npm run build   # tsc -b && vite build -> dist/
 ```
+
+`npm run dev` reads config-only variables (shell or gitignored `.env.local`, no `VITE_` prefix, never in the bundle; see README "Dev server target and port"): `RECIPES_CMS_PORT` (default 8080) targets the local stack on `http://localhost:<port>`; `RECIPES_CMS_URL` (an http(s) origin, e.g. a remote backend) takes precedence over it; `DEV_SERVER_PORT` defaults to the paired port `5173 + (RECIPES_CMS_PORT - 8080)` (8081 -> 5174), or 5173 with `RECIPES_CMS_URL`. The port is pinned (`strictPort`), because the dev server's origin must be in the backend's dev `CSRF_TRUSTED_ORIGINS` (recipes-cms trusts 5173 plus the paired port); otherwise CSRF-checked POSTs (e.g. logout) fail, while `/api/dev-login/` is exempt. Invalid values fail at startup. Example: `RECIPES_CMS_PORT=8081 npm run dev` serves `http://localhost:5174/frontend/` against the 8081 worktree stack.
 
 There is no test runner; `npm run lint` and `npm run build` (type check) are the verification steps, and CI runs both on `vX.Y.Z` tags. `npm version patch` bumps `package.json` and tags; `git push --follow-tags` triggers the GitHub release, which attaches the contents of `dist/` as a tarball.
 
