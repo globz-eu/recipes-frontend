@@ -48,7 +48,7 @@ Repo-specific rules (API client, config, URL hash, rich text) are in `frontend.m
 - One responsibility per module. Name the file after its main export (`RecipeList.tsx` exports
   `RecipeList`).
 - Named exports only. No default exports (the tool configs `eslint.config.js`, `vite.config.ts`,
-  `vitest.config.ts` are exempt) and no barrel `index.ts` files. Import the module directly.
+  `vitest.config.ts`, `playwright.config.ts` are exempt) and no barrel `index.ts` files. Import the module directly.
 - Only export what other modules use. Tests import the real exports, so don't export internals
   just to test them.
 - Dependencies point one way: `main.tsx` → `App.tsx` → components → `src/api/` and `src/auth/`.
@@ -110,12 +110,13 @@ Validate untrusted strings with `isEnumValue(AuthState, value)`. No TypeScript `
 - New features and behaviour changes get unit tests (Vitest, Testing Library) in `tests/unit`,
   mirroring the `src/` path, with shared setup in `tests/unit/support/`. Split large test files by
   scenario, as `LoginPrompt.test.tsx` does with one `describe` per scenario.
-- Once an e2e suite exists (recipes-frontend issue #3), every new user-facing feature also gets an
-  e2e test in `tests/e2e`.
+- Every new user-facing feature also gets an e2e test (Playwright) in `tests/e2e`, running against
+  the mock CMS in `tests/e2e/mock-cms.ts`.
 
 ## Before finishing
 
-Run `npm run format`, then `npm run lint`, `npm run build` and `npm test`. `format` writes
+Run `npm run format`, then `npm run lint`, `npm run build`, `npm test` and
+`npm run test:e2e`. `format` writes
 Prettier's layout, `lint` checks it. Re-read the diff and remove dead code, debug logs, unused
 exports and anything the task didn't need.
 
