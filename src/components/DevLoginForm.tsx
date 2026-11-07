@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { ApiError } from "../api/errors"
-import { apiPost, resetCsrfToken } from "../api/client"
+import { devLogin } from "../api/auth"
 import { homeQueryKeyPrefix } from "../api/home"
 
 function loginErrorMessage(err: unknown) {
@@ -27,9 +27,7 @@ export function DevLoginForm() {
     setSubmitting(true)
     setError(null)
     try {
-      await apiPost("/api/dev-login/", { username, password })
-      // The session (and with it the CSRF token) changed on login.
-      resetCsrfToken()
+      await devLogin({ username, password })
       await queryClient.invalidateQueries({ queryKey: homeQueryKeyPrefix })
     } catch (err) {
       setError(loginErrorMessage(err))

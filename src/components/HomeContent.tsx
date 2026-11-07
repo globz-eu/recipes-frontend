@@ -1,4 +1,4 @@
-import { resetCsrfToken } from "../api/client"
+import { forgetSession } from "../api/auth"
 import type { HomePage } from "../api/home"
 import { logoutUrl } from "../auth/urls"
 import type { LocaleCode } from "../locale"
@@ -30,7 +30,7 @@ export function HomeContent({ pages, locale, onLocaleChange }: HomeContentProps)
           <a
             className="logout"
             href={logoutUrl()}
-            onClick={resetCsrfToken}
+            onClick={forgetSession}
             aria-label="Log out"
             title="Log out"
           >

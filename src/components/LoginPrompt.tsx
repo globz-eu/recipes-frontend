@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { apiUrl } from "../api/client"
 import { authProvidersQueryKey, fetchAuthProviders } from "../api/auth"
 import {
   AUTH_ERROR_MESSAGES,
   AUTH_ERROR_PARAM,
   authErrorFromLocation,
-  loginNextUrl,
+  providerLoginUrl,
 } from "../auth/urls"
 import { DevLoginForm } from "./DevLoginForm"
 
@@ -25,7 +24,6 @@ export function LoginPrompt() {
     queryFn: fetchAuthProviders,
     retry: false,
   })
-  const next = encodeURIComponent(loginNextUrl())
 
   return (
     <div className="auth-prompt">
@@ -41,7 +39,7 @@ export function LoginPrompt() {
         <ul>
           {providers.data.map((provider) => (
             <li key={provider.id}>
-              <a href={apiUrl(`${provider.login_url}?next=${next}`)}>{provider.label}</a>
+              <a href={providerLoginUrl(provider.login_url)}>{provider.label}</a>
             </li>
           ))}
         </ul>

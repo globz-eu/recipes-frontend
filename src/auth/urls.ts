@@ -31,6 +31,10 @@ export function loginNextUrl(): string {
   return url.href
 }
 
+export function providerLoginUrl(loginPath: string): string {
+  return apiUrl(`${loginPath}?next=${encodeURIComponent(loginNextUrl())}`)
+}
+
 // The error code from `?auth_error=`; unknown codes count as `login_failed`.
 export function authErrorFromLocation(): AuthErrorCode | null {
   const code = new URLSearchParams(window.location.search).get(AUTH_ERROR_PARAM)
