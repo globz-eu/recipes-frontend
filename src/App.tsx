@@ -8,7 +8,7 @@ import { NoAccessPrompt } from "./components/NoAccessPrompt"
 import { getInitialLocale, storeLocale, type LocaleCode } from "./locale"
 import "./App.css"
 
-function App() {
+export function App() {
   const [locale, setLocale] = useState<LocaleCode>(getInitialLocale)
   const changeLocale = (next: LocaleCode) => {
     storeLocale(next)
@@ -65,5 +65,3 @@ function App() {
     </main>
   )
 }
-
-export default App
