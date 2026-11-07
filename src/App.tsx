@@ -21,8 +21,8 @@ export function App() {
     queryFn: () => fetchHome(locale),
     // Keep the UI mounted while another locale loads.
     placeholderData: keepPreviousData,
-    retry: (failureCount, err) => {
-      if (isLoginRequiredError(err)) return false
+    retry: (failureCount, error) => {
+      if (isLoginRequiredError(error)) return false
       return failureCount < 2
     },
   })

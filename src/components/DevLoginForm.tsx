@@ -4,10 +4,10 @@ import { ApiError } from "../api/errors"
 import { devLogin } from "../api/auth"
 import { homeQueryKeyPrefix } from "../api/home"
 
-function loginErrorMessage(err: unknown) {
-  if (err instanceof ApiError) {
-    if (err.status === 400) return "Invalid username or password."
-    if (err.status === 404) return "Dev login is disabled on this backend."
+function loginErrorMessage(error: unknown) {
+  if (error instanceof ApiError) {
+    if (error.status === 400) return "Invalid username or password."
+    if (error.status === 404) return "Dev login is disabled on this backend."
   }
   return "Login failed."
 }
@@ -29,8 +29,8 @@ export function DevLoginForm() {
     try {
       await devLogin({ username, password })
       await queryClient.invalidateQueries({ queryKey: homeQueryKeyPrefix })
-    } catch (err) {
-      setError(loginErrorMessage(err))
+    } catch (error) {
+      setError(loginErrorMessage(error))
     } finally {
       setIsSubmitting(false)
     }
