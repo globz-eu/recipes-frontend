@@ -12,6 +12,4 @@ paths:
 - **Treat 401/403 as "not logged in"**, not as an error to retry (see `App.tsx`). Use the same `retry` rule for any new top-level query that gates the UI.
 - **Selection state lives in the URL hash** (`#recipe-<locale>-<slug>`, read with `useSyncExternalStore`); there is no router. Slugs are only unique per locale, so never identify a recipe by slug alone.
 - `dangerouslySetInnerHTML` is only for backend-rendered Wagtail rich text (`preparation`). Don't use it for any other field.
-- TypeScript is strict about module syntax: use `import type` for type-only imports (`verbatimModuleSyntax`), no enums or namespaces (`erasableSyntaxOnly`), and no unused locals or parameters.
-- Style: no semicolons, single quotes, 2-space indent, named exports for components. Components live in `src/components/`, one per file, named after the component.
-- Finish every change with `npm run lint && npm run build`; there are no tests.
+- Components live in `src/components/`, one per file, named after the component.
