@@ -12,7 +12,7 @@ Repo-specific rules (API client, config, URL hash, rich text) are in `frontend.m
 - Don't add a dependency for something a few lines of code can do.
 - Prefer early returns over nesting. No `else` after `return`. No nested ternaries.
 - Prefer pure functions: `recipesForLocale` only maps its arguments to a result. Keep side
-  effects (`fetch`, `window`, the clock) at the edges: `src/api/` talks to the network,
+  effects (`fetch`, `window`, the clock) at the edges: `src/api/client.ts` talks to the network,
   `auth/urls.ts` reads `window.location`.
 - Don't reassign parameters. Return new values.
 
