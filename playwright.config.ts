@@ -10,8 +10,8 @@ if (!/^\d+$/.test(rawPort) || port < 1024 || port > 65535) {
 export default defineConfig({
   testDir: "tests/e2e",
   forbidOnly: Boolean(process.env.CI),
-  reporter: [["html", { open: "never" }]],
-  use: { baseURL: `http://localhost:${port}/frontend/` },
+  reporter: [["list"], ["html", { open: "never" }]],
+  use: { baseURL: `http://localhost:${port}/frontend/`, trace: "retain-on-failure" },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     command: `npm run build && npm run preview -- --port ${port} --strictPort`,
