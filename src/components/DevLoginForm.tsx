@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react"
 import { useQueryClient } from "@tanstack/react-query"
-import { ApiError, apiPost, resetCsrfToken } from "../api/client"
+import { ApiError } from "../api/errors"
+import { apiPost, resetCsrfToken } from "../api/client"
 import { homeQueryKeyPrefix } from "../api/home"
 
 function loginErrorMessage(err: unknown) {

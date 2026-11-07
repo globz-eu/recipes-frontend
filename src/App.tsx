@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
-import { ApiError, isNoAccessError } from "./api/client"
+import { isLoginRequiredError, isNoAccessError } from "./api/errors"
 import { homeQueryKey, fetchHome } from "./api/home"
 import { HomeContent } from "./components/HomeContent"
 import { LoginPrompt } from "./components/LoginPrompt"
@@ -22,9 +22,7 @@ function App() {
     // Keep the UI mounted while another locale loads.
     placeholderData: keepPreviousData,
     retry: (failureCount, err) => {
-      if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
-        return false
-      }
+      if (isLoginRequiredError(err)) return false
       return failureCount < 2
     },
   })
@@ -45,7 +43,7 @@ function App() {
     )
   }
 
-  if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+  if (isLoginRequiredError(error)) {
     return (
       <main>
         <LoginPrompt />

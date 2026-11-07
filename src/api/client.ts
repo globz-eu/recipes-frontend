@@ -1,28 +1,8 @@
 import { getConfig } from "../config"
+import { ApiError } from "./errors"
 
 export function apiUrl(path: string): string {
   return `${getConfig().apiBaseUrl}${path}`
-}
-
-export class ApiError extends Error {
-  readonly status: number
-  readonly body: unknown
-
-  constructor(status: number, message: string, body: unknown = null) {
-    super(message)
-    this.name = "ApiError"
-    this.status = status
-    this.body = body
-  }
-}
-
-// The CMS answers authenticated users without a role with 403 and code "no_access".
-export function isNoAccessError(error: unknown): boolean {
-  if (!(error instanceof ApiError) || error.status !== 403) return false
-  const body = error.body
-  return (
-    typeof body === "object" && body !== null && (body as { code?: unknown }).code === "no_access"
-  )
 }
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
