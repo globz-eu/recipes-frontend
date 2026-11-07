@@ -5,6 +5,7 @@ import {
   frontendRootUrl,
   loginNextUrl,
   logoutUrl,
+  providerLoginUrl,
 } from "../../../src/auth/urls"
 
 vi.mock("../../../src/config", () => ({ getConfig: () => ({ apiBaseUrl: "https://cms.example" }) }))
@@ -107,5 +108,20 @@ describe("edge cases", () => {
   it("an empty auth_error value counts as login_failed", () => {
     setLocation("/frontend/?auth_error=")
     expect(authErrorFromLocation()).toBe("login_failed")
+  })
+})
+
+describe("providerLoginUrl", () => {
+  it("prefixes the backend and passes the current page as encoded next", () => {
+    setLocation("/frontend/?x=1#recipe-en-foo")
+    expect(providerLoginUrl("/login/zitadel/")).toBe(
+      `https://cms.example/login/zitadel/?next=${encodeURIComponent(loginNextUrl())}`,
+    )
+  })
+
+  it("drops auth_error from next", () => {
+    setLocation("/frontend/?auth_error=login_failed&x=1")
+    const url = new URL(providerLoginUrl("/login/zitadel/"))
+    expect(url.searchParams.get("next")).toBe(`${window.location.origin}/frontend/?x=1`)
   })
 })
