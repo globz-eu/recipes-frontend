@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { devLogin, fetchAuthProviders, forgetSession } from "../../../src/api/auth"
-import { resetCsrfToken } from "../../../src/api/client"
+import { apiPost, resetCsrfToken } from "../../../src/api/client"
 
 vi.mock("../../../src/config", () => ({ getConfig: () => ({ apiBaseUrl: "https://cms.example" }) }))
 
@@ -88,11 +88,28 @@ describe("forgetSession", () => {
       .mockResolvedValueOnce(jsonResponse({ csrfToken: "token-2" }))
       .mockResolvedValueOnce(jsonResponse({}))
     vi.stubGlobal("fetch", fetchMock)
-    await devLogin({ username: "a", password: "b" })
+    // A plain write primes the token without resetting it.
+    await apiPost("/x", {})
 
     forgetSession()
-    await devLogin({ username: "a", password: "b" })
+    await apiPost("/x", {})
 
     expect(fetchMock.mock.calls[2][0]).toBe("https://cms.example/api/csrf/")
+    expect(fetchMock.mock.calls[3][1].headers["X-CSRFToken"]).toBe("token-2")
+  })
+
+  it("reuses the cached CSRF token when it is not forgotten", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ csrfToken: "token-1" }))
+      .mockResolvedValueOnce(jsonResponse({}))
+      .mockResolvedValueOnce(jsonResponse({}))
+    vi.stubGlobal("fetch", fetchMock)
+    await apiPost("/x", {})
+
+    await apiPost("/x", {})
+
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+    expect(fetchMock.mock.calls[2][1].headers["X-CSRFToken"]).toBe("token-1")
   })
 })
