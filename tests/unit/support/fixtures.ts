@@ -1,3 +1,4 @@
+import { vi } from "vitest"
 import type { HomePage } from "../../../src/api/home"
 import type { Recipe } from "../../../src/api/recipes"
 
@@ -26,4 +27,11 @@ export function jsonResponse(body: unknown, status = 200) {
     status,
     headers: { "Content-Type": "application/json" },
   })
+}
+
+export function stubFetch(...responses: Response[]) {
+  const fetchMock = vi.fn()
+  for (const response of responses) fetchMock.mockResolvedValueOnce(response)
+  vi.stubGlobal("fetch", fetchMock)
+  return fetchMock
 }

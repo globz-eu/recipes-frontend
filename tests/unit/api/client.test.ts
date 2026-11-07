@@ -1,22 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { apiDelete, apiFetch, apiPost, apiUrl, resetCsrfToken } from "../../../src/api/client"
 import { ApiError, isNoAccessError } from "../../../src/api/errors"
+import { jsonResponse, stubFetch } from "../support/fixtures"
 
 vi.mock("../../../src/config", () => ({ getConfig: () => ({ apiBaseUrl: "https://cms.example" }) }))
-
-function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  })
-}
-
-function stubFetch(...responses: Response[]) {
-  const fetchMock = vi.fn()
-  for (const response of responses) fetchMock.mockResolvedValueOnce(response)
-  vi.stubGlobal("fetch", fetchMock)
-  return fetchMock
-}
 
 beforeEach(() => resetCsrfToken())
 

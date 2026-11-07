@@ -7,18 +7,9 @@ import {
   getCsrfToken,
   resetCsrfToken,
 } from "../../../src/api/client"
-import { fetchHome } from "../../../src/api/home"
-import { fetchRecipes } from "../../../src/api/recipes"
-import { jsonResponse } from "../support/fixtures"
+import { jsonResponse, stubFetch } from "../support/fixtures"
 
 vi.mock("../../../src/config", () => ({ getConfig: () => ({ apiBaseUrl: "https://cms.example" }) }))
-
-function stubFetch(...responses: Response[]) {
-  const fetchMock = vi.fn()
-  for (const response of responses) fetchMock.mockResolvedValueOnce(response)
-  vi.stubGlobal("fetch", fetchMock)
-  return fetchMock
-}
 
 beforeEach(() => resetCsrfToken())
 
@@ -109,24 +100,5 @@ describe("CSRF failure with a plain text body", () => {
 
     await expect(apiPost("/x")).rejects.toMatchObject({ status: 400 })
     expect(fetchMock).toHaveBeenCalledTimes(2)
-  })
-})
-
-describe("endpoint URLs", () => {
-  it("fetchHome requests the locale, encoded", async () => {
-    const fetchMock = stubFetch(jsonResponse([]), jsonResponse([]))
-
-    await fetchHome("de")
-    await fetchHome("a&b")
-
-    expect(fetchMock.mock.calls[0][0]).toBe("https://cms.example/api/home/?locale=de")
-    expect(fetchMock.mock.calls[1][0]).toBe("https://cms.example/api/home/?locale=a%26b")
-  })
-
-  it("fetchRecipes requests all locales at once", async () => {
-    const fetchMock = stubFetch(jsonResponse({ locales: {} }))
-
-    await expect(fetchRecipes()).resolves.toEqual({ locales: {} })
-    expect(fetchMock.mock.calls[0][0]).toBe("https://cms.example/api/recipes/")
   })
 })

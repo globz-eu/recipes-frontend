@@ -18,14 +18,7 @@ function makeLocaleRecipe(locale: string, key: string, id: number): Recipe {
 }
 
 function stubRecipes(locales: Record<string, Recipe[]>) {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ locales }), {
-        headers: { "Content-Type": "application/json" },
-      }),
-    ),
-  )
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ locales })))
 }
 
 async function listedTitles() {
