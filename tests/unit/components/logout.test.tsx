@@ -1,11 +1,11 @@
 import { screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { renderWithQuery } from "../test/render"
-import { HomeContent } from "./HomeContent"
-import { NoAccessPrompt } from "./NoAccessPrompt"
+import { renderWithQuery } from "../support/render"
+import { HomeContent } from "../../../src/components/HomeContent"
+import { NoAccessPrompt } from "../../../src/components/NoAccessPrompt"
 
-vi.mock("../config", () => ({ getConfig: () => ({ apiBaseUrl: "https://cms.example" }) }))
-vi.mock("./RecipeList", () => ({ RecipeList: () => null }))
+vi.mock("../../../src/config", () => ({ getConfig: () => ({ apiBaseUrl: "https://cms.example" }) }))
+vi.mock("../../../src/components/RecipeList", () => ({ RecipeList: () => null }))
 
 const expectedNext = () => encodeURIComponent(`${window.location.origin}/frontend/`)
 

@@ -8,8 +8,8 @@ export default defineConfig({
   base: "/frontend/",
   test: {
     environment: "jsdom",
-    include: ["src/**/*.test.{ts,tsx}", "tests/unit/**/*.test.{ts,tsx}"],
-    setupFiles: ["./src/test/setup.ts"],
+    include: ["tests/unit/**/*.test.{ts,tsx}"],
+    setupFiles: ["./tests/unit/support/setup.ts"],
     globals: false,
     restoreMocks: true,
   },
