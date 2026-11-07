@@ -1,7 +1,7 @@
-import type { AuthProvider } from "../src/api/auth"
-import type { HomePage } from "../src/api/home"
-import type { Recipe, RecipesByLocale } from "../src/api/recipes"
-import type { LocaleCode } from "../src/locale"
+import type { AuthProvider } from "../../src/api/auth"
+import type { HomePage } from "../../src/api/home"
+import type { Recipe, RecipesByLocale } from "../../src/api/recipes"
+import type { LocaleCode } from "../../src/locale"
 
 export const homePages: Record<LocaleCode, HomePage> = {
   en: { title: "Family recipes", description: "Dishes we cook again and again" },

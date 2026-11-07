@@ -9,7 +9,7 @@ if (!Number.isInteger(port) || port < 1024 || port > 65535) {
 }
 
 export default defineConfig({
-  testDir: "e2e",
+  testDir: "tests/e2e",
   reporter: [["html", { open: "never" }]],
   use: { baseURL: `http://localhost:${port}/frontend/` },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],

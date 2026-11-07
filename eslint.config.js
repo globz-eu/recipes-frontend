@@ -107,7 +107,7 @@ export default defineConfig([
   },
   { files: ["src/components/RecipeDetail.tsx"], rules: { "no-restricted-syntax": "off" } },
   {
-    files: ["e2e/**/*.ts", "playwright.config.ts"],
+    files: ["tests/e2e/**/*.ts", "playwright.config.ts"],
     languageOptions: { globals: globals.node },
     // Playwright fixtures call use(), which the hooks rules mistake for React's use().
     rules: { "react-hooks/rules-of-hooks": "off", "react-hooks/exhaustive-deps": "off" },

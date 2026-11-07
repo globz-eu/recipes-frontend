@@ -21,5 +21,6 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["tests"]
+  "include": ["tests"],
+  "exclude": ["tests/e2e"]
 }
