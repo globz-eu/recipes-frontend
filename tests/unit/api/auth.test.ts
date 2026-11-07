@@ -1,15 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { devLogin, fetchAuthProviders, forgetSession } from "../../../src/api/auth"
 import { apiPost, resetCsrfToken } from "../../../src/api/client"
+import { jsonResponse } from "../support/fixtures"
 
 vi.mock("../../../src/config", () => ({ getConfig: () => ({ apiBaseUrl: "https://cms.example" }) }))
-
-function jsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  })
-}
 
 beforeEach(() => resetCsrfToken())
 
