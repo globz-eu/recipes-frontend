@@ -67,8 +67,9 @@ function logProxyTarget(target: string, warning?: string): Plugin {
 }
 
 // https://vite.dev/config/
-export default defineConfig(({ command, mode }) => {
-  if (command !== "serve") {
+export default defineConfig(({ command, mode, isPreview }) => {
+  // vite build and vite preview serve the built app: no proxy, no dev env validation.
+  if (command !== "serve" || isPreview) {
     return { plugins: [react()], base: "/frontend/" }
   }
 
