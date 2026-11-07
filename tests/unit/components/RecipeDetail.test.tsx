@@ -75,3 +75,12 @@ describe("RecipeDetail meta", () => {
     expect(screen.queryByText("Cooking")).not.toBeInTheDocument()
   })
 })
+
+describe("RecipeDetail meta durations", () => {
+  it("formats minutes below an hour and hours with minutes", () => {
+    render(<RecipeDetail recipe={makeRecipe({ preparation_time: 45, cooking_time: 90 })} />)
+
+    expect(screen.getByText("Preparation").nextSibling).toHaveTextContent(/^45 min$/)
+    expect(screen.getByText("Cooking").nextSibling).toHaveTextContent(/^1 h 30 min$/)
+  })
+})
