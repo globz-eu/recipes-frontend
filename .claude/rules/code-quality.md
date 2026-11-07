@@ -12,17 +12,18 @@ Repo-specific rules (API client, config, URL hash, rich text) are in `frontend.m
   instead of a router, because one detail view needs nothing more.
 - Don't add a dependency for something a few lines of code can do.
 - Prefer early returns over nesting. No `else` after `return`. No nested ternaries.
-- Prefer pure functions. Keep side effects (`fetch`, `window`, the clock) at the edges: `auth/urls.ts`
-  builds URLs, `src/api/` talks to the network.
+- Prefer pure functions: `recipesForLocale` only maps its arguments to a result. Keep side
+  effects (`fetch`, `window`, the clock) at the edges: `src/api/` talks to the network,
+  `auth/urls.ts` reads `window.location`.
 - Don't reassign parameters. Return new values.
 
 ## DRY
 
-- Extract a helper when logic is used twice or a name explains it better than the code does,
-  not before. `isLoginRequiredError` (`src/api/errors.ts`) decides "not logged in" for both the
+- Extract a helper on the second real use, or earlier when a name explains the logic better
+  than the code does. `isLoginRequiredError` (`src/api/errors.ts`) decides "not logged in" for both the
   `retry` rule and the render branch in `App.tsx`; `logoutUrl()` is shared by `HomeContent` and
   `NoAccessPrompt`.
-- Two similar lines are not duplication yet. Wait for the third use before abstracting.
+- Similar-looking code with different reasons to change is not duplication. Don't merge it.
 
 ## Separation of concerns
 
@@ -31,7 +32,7 @@ Repo-specific rules (API client, config, URL hash, rich text) are in `frontend.m
 - Components render and handle events; fetching, URL building and error classification live in
   `src/api/` and `src/auth/`.
 - `dangerouslySetInnerHTML` only in `RecipeDetail` (lint-enforced).
-- `src/` never imports from `tests/`.
+- `src/` never imports from `tests/` (lint-enforced).
 
 ## Size limits (lint-enforced)
 
@@ -58,7 +59,8 @@ Repo-specific rules (API client, config, URL hash, rich text) are in `frontend.m
 
 - Use declarative names that say what something is or does: `authErrorFromLocation`,
   `recipesForLocale`, `isLoginRequiredError`. No abbreviations or bare generic names (`data`,
-  `util`, `helper`, `manager`, `tmp`); handlers name what they handle.
+  `util`, `helper`, `manager`, `tmp`) in your own code; handlers name what they handle. Names a
+  library gives you stay (TanStack Query's `data`, `err` in a `catch`).
 - Booleans read as questions and start with `is`, `has`, `can` or `should`: `isSubmitting`,
   `isBareOrigin` (lint-enforced for variables, parameters and own type properties). Properties
   mirroring the API in snake_case are exempt, as they keep the backend's names.
@@ -66,11 +68,19 @@ Repo-specific rules (API client, config, URL hash, rich text) are in `frontend.m
 
 ## Enums over boolean flags
 
-Don't use boolean flags (parameters or state) when an enum is an option: `stubFetch(status, body)`
-replaced an `ok` flag. Use `as const` objects with an `EnumValue` type, in `src/enum.ts` (added
+Don't use boolean flags (parameters or state) when an enum is an option. Use `as const` objects with an `EnumValue` type, in `src/enum.ts` (added
 with the first enum):
 
 ```ts
+type EnumValue<T> = T[keyof T]
+
+function isEnumValue<T extends Record<string, string>>(
+  enumObject: T,
+  value: unknown,
+): value is EnumValue<T> {
+  return Object.values(enumObject).includes(value as string)
+}
+
 const AuthState = {
   Anonymous: "anonymous",
   SignedIn: "signed-in",
@@ -78,7 +88,7 @@ const AuthState = {
 type AuthState = EnumValue<typeof AuthState>
 ```
 
-Validate untrusted strings with `isEnumValue`. No TypeScript `enum` (`erasableSyntaxOnly`).
+Validate untrusted strings with `isEnumValue(AuthState, value)`. No TypeScript `enum` (`erasableSyntaxOnly`).
 
 ## Comments
 
@@ -89,7 +99,8 @@ Validate untrusted strings with `isEnumValue`. No TypeScript `enum` (`erasableSy
 
 ## Types
 
-- No `any`, also not in tests (lint-enforced). Use `unknown` and narrow it.
+- No `any`, also not in tests (lint-enforced). Use `unknown` and narrow it: `ApiError.body` is
+  `unknown`, and `isNoAccessError` narrows it before reading `code`.
 - Use `import type` / inline `type` for type-only imports (lint-enforced).
 - Validate untrusted data at the boundary (`src/api/`, `src/config.ts`), not in components.
 - Let TypeScript infer local types. Annotate exported function signatures.

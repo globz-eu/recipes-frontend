@@ -8,8 +8,10 @@ served under `/frontend/`.
 ```bash
 npm ci
 npm run dev    # proxies the API to recipes-cms on http://localhost:8080
+npm run format
 npm run lint
 npm run build  # outputs dist/
+npm test
 ```
 
 The local recipes-cms compose setup serves `../recipes-frontend/dist` at `/frontend/`.

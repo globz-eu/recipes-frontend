@@ -19,7 +19,7 @@ npm test        # vitest run (jsdom + Testing Library; config in vitest.config.t
 
 `npm run dev` reads config-only variables (shell or gitignored `.env.local`, no `VITE_` prefix, never in the bundle; see README "Dev server target and port"): `RECIPES_CMS_PORT` (default 8080) targets the local stack on `http://localhost:<port>`; `RECIPES_CMS_URL` (an http(s) origin, e.g. a remote backend) takes precedence over it; `DEV_SERVER_PORT` defaults to the paired port `5173 + (RECIPES_CMS_PORT - 8080)` (8081 -> 5174), or 5173 with `RECIPES_CMS_URL`. The port is pinned (`strictPort`), because the dev server's origin must be in the backend's dev `CSRF_TRUSTED_ORIGINS` (recipes-cms trusts 5173 plus the paired port); otherwise CSRF-checked POSTs (e.g. logout) fail, while `/api/dev-login/` is exempt. Invalid values fail at startup. Example: `RECIPES_CMS_PORT=8081 npm run dev` serves `http://localhost:5174/frontend/` against the 8081 worktree stack.
 
-Tests are vitest files in `tests/unit/**/*.test.{ts,tsx}`, mirroring `src/` (setup in `tests/unit/support/setup.ts`; `tests/e2e` comes with issue #3); `npm run format`, `npm run lint` (ESLint with the size, shape and boundary rules plus the Prettier check), `npm run build` (type check, also of `tests/`) and `npm test` are the verification steps, and CI runs all three on `vX.Y.Z` tags. `npm version patch` bumps `package.json` and tags; `git push --follow-tags` triggers the GitHub release, which attaches the contents of `dist/` as a tarball.
+Tests are vitest files in `tests/unit/**/*.test.{ts,tsx}`, mirroring `src/` (setup in `tests/unit/support/setup.ts`; `tests/e2e` comes with issue #3); run `npm run format` first (it writes); `npm run lint` (ESLint with the size, shape and boundary rules plus the Prettier check), `npm run build` (type check, also of `tests/`) and `npm test` are the verification steps, and CI runs all three on `vX.Y.Z` tags. `npm version patch` bumps `package.json` and tags; `git push --follow-tags` triggers the GitHub release, which attaches the contents of `dist/` as a tarball.
 
 ## Architecture
 
@@ -35,6 +35,6 @@ React 19 + TypeScript + Vite + TanStack Query, a thin client for the sibling `..
 
 Read both rules files before changing code; ESLint enforces the measurable parts.
 
-- [`.claude/rules/code-quality.md`](.claude/rules/code-quality.md): simplicity, DRY, size limits, modularity, naming, types, testing, workflow, commit style.
+- [`.claude/rules/code-quality.md`](.claude/rules/code-quality.md): simplicity, DRY, separation of concerns, size limits, modularity, naming, enums, comments, types, testing, workflow, commit style.
 - [`.claude/rules/frontend.md`](.claude/rules/frontend.md): repo-specific rules (API client, config, URL hash, rich text).
 - Commit messages: short, capitalised imperative verb, no prefix (`Move API errors into their own module`).
