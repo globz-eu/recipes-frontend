@@ -21,11 +21,13 @@ Goal: (1) one login link per provider, (2) messages for `auth_error`, (3) fixed 
 ## Design
 
 ### Test framework (minimal)
+
 Dev deps: `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event` (only if needed; can skip). Extend `vite.config.ts` carefully: it returns two branches via `defineConfig(({command}) => ...)`; vitest reads the same config with `command: 'serve'`, which would run `loadEnv` and `pairedDevServerPort` and may throw on invalid env. Preferred: add a separate `vitest.config.ts` (`mergeConfig` not needed; just `defineConfig({ plugins:[react()], base:'/frontend/', test:{ environment:'jsdom', setupFiles:['./src/test/setup.ts'], globals:false, restoreMocks:true } })`). Setup file imports `@testing-library/jest-dom/vitest` and registers `cleanup`. Add `"test": "vitest run"` script. Add `"vitest/globals"`-free imports (explicit `import { describe, it, expect, vi } from 'vitest'`) so tsconfig `types` stays as is. `tsc -b` covers `src` including tests; ensure `vitest.config.ts` is added to `tsconfig.node.json` include (check its current include). Test files `src/**/*.test.tsx` colocated.
 
 Test helpers: `src/test/render.tsx` wrapping in a fresh `QueryClientProvider` (retry false); `setConfig`: `loadConfig()` is runtime fetch and `getConfig()` throws before it, so tests mock `../config` (`vi.mock('../config', () => ({ getConfig: () => ({ apiBaseUrl: '' }) }))`) or stub `fetch` for config.json. Prefer mocking `getConfig`. Mock API with `vi.stubGlobal('fetch', ...)` returning JSON responses with `Content-Type: application/json` (client `parseBody` checks that header).
 
 ### Code changes
+
 - `src/api/auth.ts` (new): `AuthProvider` type, `authProvidersQueryKey`, `fetchAuthProviders()` using `apiFetch<{providers: AuthProvider[]}>('/api/auth/providers/')` returning `.providers`. Note: client uses `credentials: 'include'`; CMS endpoint has no auth, fine; cross-origin CORS already configured for `/api/`.
 - `src/auth/urls.ts` (new, small pure helpers, testable): `frontendRootUrl()` = `new URL(import.meta.env.BASE_URL, window.location.origin).href`; `logoutUrl()` = `apiUrl('/admin/logout/?next=' + encodeURIComponent(frontendRootUrl()))`; `loginNextUrl()` = `window.location.href` with `auth_error` stripped; `authErrorFromLocation()`; `AUTH_ERROR_MESSAGES: Record<code,string>`. Messages (suggested): email_missing "Your account provider did not share an email address."; email_unverified "Please verify your email address with your provider, then try again."; email_in_use "This email address is already used with a different login method. Use that method to sign in."; already_signed_in "You are already signed in with another account or this identity belongs to another user."; login_failed "Sign-in failed. Please try again.".
   - Single `logoutUrl()` used by both components removes duplication.
@@ -35,6 +37,7 @@ Test helpers: `src/test/render.tsx` wrapping in a fresh `QueryClientProvider` (r
 - Vite dev proxy: `/api`, `/login`, `/admin` already proxied; no change. Under `npm run dev`, `BASE_URL` is `/frontend/` and origin is the dev server (`localhost:5173`), which matches `DEV_FRONTEND_ORIGINS`/redirect-host allowlist in the CMS.
 
 ### Trade-offs
+
 - Separate `vitest.config.ts` vs. extending `vite.config.ts`: separate avoids the dev-env validation side effects and the `command !== 'serve'` branch.
 - Stripping `auth_error` from the URL after reading: avoids stale errors on reload and on next login; small risk of StrictMode double effect (idempotent).
 - Providers fetched via TanStack Query (consistent with project) instead of ad hoc `useEffect`.

@@ -1,17 +1,9 @@
-import { defineConfig, loadEnv } from 'vite'
-import type { Plugin } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig, loadEnv } from "vite"
+import type { Plugin } from "vite"
+import react from "@vitejs/plugin-react"
 
 // Paths the dev server forwards to recipes-cms.
-const proxiedPaths = [
-  '/api',
-  '/api-auth',
-  '/login',
-  '/complete',
-  '/disconnect',
-  '/admin',
-  '/media',
-]
+const proxiedPaths = ["/api", "/api-auth", "/login", "/complete", "/disconnect", "/admin", "/media"]
 
 const defaultCmsPort = 8080
 const defaultDevServerPort = 5173
@@ -51,8 +43,8 @@ function readOrigin(env: Record<string, string>, name: string) {
   } catch {
     throw fail()
   }
-  const bare = url.pathname === '/' && !url.search && !url.hash
-  if (!['http:', 'https:'].includes(url.protocol) || !bare || url.username || url.password) {
+  const bare = url.pathname === "/" && !url.search && !url.hash
+  if (!["http:", "https:"].includes(url.protocol) || !bare || url.username || url.password) {
     throw fail()
   }
   return url.origin
@@ -61,7 +53,7 @@ function readOrigin(env: Record<string, string>, name: string) {
 // Prints the proxy target when the dev server starts (not for vite build).
 function logProxyTarget(target: string, warning?: string): Plugin {
   return {
-    name: 'log-proxy-target',
+    name: "log-proxy-target",
     configureServer(server) {
       server.config.logger.info(`  recipes-cms proxy target: ${target}`)
       if (warning) server.config.logger.warn(`  ${warning}`)
@@ -71,27 +63,27 @@ function logProxyTarget(target: string, warning?: string): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig(({ command, mode }) => {
-  if (command !== 'serve') {
-    return { plugins: [react()], base: '/frontend/' }
+  if (command !== "serve") {
+    return { plugins: [react()], base: "/frontend/" }
   }
 
   // The proxy settings are config-only, so they carry no VITE_ prefix and never reach
   // the client bundle. Reads .env, .env.local, .env.[mode][.local] and the shell environment.
-  const env = loadEnv(mode, process.cwd(), '')
-  const cmsPort = readPort(env, 'RECIPES_CMS_PORT')
+  const env = loadEnv(mode, process.cwd(), "")
+  const cmsPort = readPort(env, "RECIPES_CMS_PORT")
   // RECIPES_CMS_URL (any backend, e.g. a remote one) takes precedence over RECIPES_CMS_PORT
   // (a local stack on http://localhost:<port>).
-  const cmsUrl = readOrigin(env, 'RECIPES_CMS_URL')
+  const cmsUrl = readOrigin(env, "RECIPES_CMS_URL")
   const target = cmsUrl ?? `http://localhost:${cmsPort ?? defaultCmsPort}`
   const warning =
     cmsUrl && cmsPort !== undefined
-      ? 'RECIPES_CMS_PORT is ignored because RECIPES_CMS_URL is set'
+      ? "RECIPES_CMS_PORT is ignored because RECIPES_CMS_URL is set"
       : undefined
   // Stack 8080 pairs with dev server 5173, 8081 with 5174, ... (recipes-cms trusts the
   // paired origin for CSRF). With RECIPES_CMS_URL there is no stack port to pair with, so
   // the default is 5173. The port is pinned: a silent move would fail every POST.
   const devServerPort =
-    readPort(env, 'DEV_SERVER_PORT') ??
+    readPort(env, "DEV_SERVER_PORT") ??
     (cmsUrl ? defaultDevServerPort : pairedDevServerPort(cmsPort ?? defaultCmsPort))
   // A local stack's nginx ignores the incoming port (it sends X-Forwarded-Host with its own),
   // so its proxy keeps the dev server's Host; another backend needs its own Host to match its
@@ -100,7 +92,7 @@ export default defineConfig(({ command, mode }) => {
 
   return {
     plugins: [react(), logProxyTarget(target, warning)],
-    base: '/frontend/',
+    base: "/frontend/",
     server: {
       port: devServerPort,
       strictPort: true,

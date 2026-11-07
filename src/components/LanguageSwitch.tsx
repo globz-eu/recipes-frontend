@@ -1,4 +1,4 @@
-import { LOCALES, type LocaleCode } from '../locale'
+import { LOCALES, type LocaleCode } from "../locale"
 
 interface LanguageSwitchProps {
   locale: LocaleCode

@@ -1,14 +1,14 @@
-import { useQuery } from '@tanstack/react-query'
-import { useSyncExternalStore } from 'react'
-import { fetchRecipes, recipesQueryKey, type Recipe } from '../api/recipes'
-import { LOCALES, type LocaleCode } from '../locale'
-import { RecipeDetail } from './RecipeDetail'
+import { useQuery } from "@tanstack/react-query"
+import { useSyncExternalStore } from "react"
+import { fetchRecipes, recipesQueryKey, type Recipe } from "../api/recipes"
+import { LOCALES, type LocaleCode } from "../locale"
+import { RecipeDetail } from "./RecipeDetail"
 
-const HASH_PREFIX = '#recipe-'
+const HASH_PREFIX = "#recipe-"
 
 function subscribeToHash(callback: () => void) {
-  window.addEventListener('hashchange', callback)
-  return () => window.removeEventListener('hashchange', callback)
+  window.addEventListener("hashchange", callback)
+  return () => window.removeEventListener("hashchange", callback)
 }
 
 // Slugs are only unique per locale, so the hash is `#recipe-<locale>-<slug>`.

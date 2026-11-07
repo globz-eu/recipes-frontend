@@ -1,9 +1,9 @@
-import { resetCsrfToken } from '../api/client'
-import type { HomePage } from '../api/home'
-import { logoutUrl } from '../auth/urls'
-import type { LocaleCode } from '../locale'
-import { LanguageSwitch } from './LanguageSwitch'
-import { RecipeList } from './RecipeList'
+import { resetCsrfToken } from "../api/client"
+import type { HomePage } from "../api/home"
+import { logoutUrl } from "../auth/urls"
+import type { LocaleCode } from "../locale"
+import { LanguageSwitch } from "./LanguageSwitch"
+import { RecipeList } from "./RecipeList"
 
 interface HomeContentProps {
   pages: HomePage[]
@@ -21,9 +21,7 @@ export function HomeContent({ pages, locale, onLocaleChange }: HomeContentProps)
               <h1>
                 <a href="#">{page.title}</a>
               </h1>
-              {page.description && (
-                <p className="home-description">{page.description}</p>
-              )}
+              {page.description && <p className="home-description">{page.description}</p>}
             </div>
           ))}
         </div>

@@ -1,13 +1,13 @@
 export const LOCALES = [
-  { code: 'en', label: 'English' },
-  { code: 'de', label: 'Deutsch' },
-  { code: 'fr', label: 'Français' },
-  { code: 'nl', label: 'Nederlands' },
+  { code: "en", label: "English" },
+  { code: "de", label: "Deutsch" },
+  { code: "fr", label: "Français" },
+  { code: "nl", label: "Nederlands" },
 ] as const
 
-export type LocaleCode = (typeof LOCALES)[number]['code']
+export type LocaleCode = (typeof LOCALES)[number]["code"]
 
-const STORAGE_KEY = 'locale'
+const STORAGE_KEY = "locale"
 
 function isLocaleCode(value: string | null | undefined): value is LocaleCode {
   return LOCALES.some((locale) => locale.code === value)
@@ -22,7 +22,7 @@ export function getInitialLocale(): LocaleCode {
     // Storage may be unavailable (private mode); fall through.
   }
   const browser = navigator.language.slice(0, 2)
-  return isLocaleCode(browser) ? browser : 'en'
+  return isLocaleCode(browser) ? browser : "en"
 }
 
 export function storeLocale(locale: LocaleCode): void {

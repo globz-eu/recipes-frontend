@@ -1,4 +1,4 @@
-import { apiFetch } from './client'
+import { apiFetch } from "./client"
 
 export interface Ingredient {
   quantity: number | null
@@ -21,7 +21,7 @@ export interface Recipe {
   number_of_people: number | null
 }
 
-export const recipesQueryKey = ['recipes'] as const
+export const recipesQueryKey = ["recipes"] as const
 
 // Without ?locale= the API groups all recipes by locale code.
 export interface RecipesByLocale {
@@ -29,5 +29,5 @@ export interface RecipesByLocale {
 }
 
 export function fetchRecipes(): Promise<RecipesByLocale> {
-  return apiFetch<RecipesByLocale>('/api/recipes/')
+  return apiFetch<RecipesByLocale>("/api/recipes/")
 }
