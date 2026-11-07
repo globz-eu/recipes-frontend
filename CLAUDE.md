@@ -35,6 +35,6 @@ React 19 + TypeScript + Vite + TanStack Query, a thin client for the sibling `..
 
 Read both rules files before changing code; ESLint enforces the measurable parts.
 
-- [`.claude/rules/code-quality.md`](.claude/rules/code-quality.md): simplicity, DRY, separation of concerns, size limits, modularity, naming, enums, comments, types, testing, workflow, commit style.
+- [`.claude/rules/code-quality.md`](.claude/rules/code-quality.md): simplicity, DRY, separation of concerns, size limits, modularity, naming, enums, comments, types, testing, before finishing, workflow, commit style.
 - [`.claude/rules/frontend.md`](.claude/rules/frontend.md): repo-specific rules (API client, config, URL hash, rich text).
 - Commit messages: short, capitalised imperative verb, no prefix (`Move API errors into their own module`).

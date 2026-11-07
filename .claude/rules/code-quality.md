@@ -8,8 +8,7 @@ Repo-specific rules (API client, config, URL hash, rich text) are in `frontend.m
 ## Simplicity / YAGNI
 
 - Write the simplest code that solves the current requirement. No speculative config keys,
-  options, extension points or abstractions "for later". Selection state lives in the URL hash
-  instead of a router, because one detail view needs nothing more.
+  options, extension points or abstractions "for later".
 - Don't add a dependency for something a few lines of code can do.
 - Prefer early returns over nesting. No `else` after `return`. No nested ternaries.
 - Prefer pure functions: `recipesForLocale` only maps its arguments to a result. Keep side
@@ -20,14 +19,14 @@ Repo-specific rules (API client, config, URL hash, rich text) are in `frontend.m
 ## DRY
 
 - Extract a helper on the second real use, or earlier when a name explains the logic better
-  than the code does. `isLoginRequiredError` (`src/api/errors.ts`) decides "not logged in" for both the
-  `retry` rule and the render branch in `App.tsx`; `logoutUrl()` is shared by `HomeContent` and
+  than the code does. `isLoginRequiredError` (`src/api/errors.ts`) decides "not logged in" for both
+  the `retry` rule and the render branch in `App.tsx`; `logoutUrl()` is shared by `HomeContent` and
   `NoAccessPrompt`.
 - Similar-looking code with different reasons to change is not duplication. Don't merge it.
 
 ## Separation of concerns
 
-- Network access only in `src/api/client.ts` and `src/config.ts` (lint-enforced). Components and
+- `fetch` only in `src/api/client.ts` and `src/config.ts` (lint-enforced). Components and
   `App.tsx` use `src/api/<resource>.ts` modules and never import `client.ts`.
 - Components render and handle events; fetching, URL building and error classification live in
   `src/api/` and `src/auth/`.
@@ -60,7 +59,7 @@ Repo-specific rules (API client, config, URL hash, rich text) are in `frontend.m
 - Use declarative names that say what something is or does: `authErrorFromLocation`,
   `recipesForLocale`, `isLoginRequiredError`. No abbreviations or bare generic names (`data`,
   `util`, `helper`, `manager`, `tmp`) in your own code; handlers name what they handle. Names a
-  library gives you stay (TanStack Query's `data`, `err` in a `catch`).
+  library gives you stay (TanStack Query's `data`).
 - Booleans read as questions and start with `is`, `has`, `can` or `should`: `isSubmitting`,
   `isBareOrigin` (lint-enforced for variables, parameters and own type properties). Properties
   mirroring the API in snake_case are exempt, as they keep the backend's names.
@@ -68,8 +67,8 @@ Repo-specific rules (API client, config, URL hash, rich text) are in `frontend.m
 
 ## Enums over boolean flags
 
-Don't use boolean flags (parameters or state) when an enum is an option. Use `as const` objects with an `EnumValue` type, in `src/enum.ts` (added
-with the first enum):
+Don't use boolean flags (parameters or state) when an enum is an option. Use `as const` objects
+with an `EnumValue` type, in `src/enum.ts` (add it with the first enum):
 
 ```ts
 type EnumValue<T> = T[keyof T]
@@ -78,7 +77,7 @@ function isEnumValue<T extends Record<string, string>>(
   enumObject: T,
   value: unknown,
 ): value is EnumValue<T> {
-  return Object.values(enumObject).includes(value as string)
+  return (Object.values(enumObject) as unknown[]).includes(value)
 }
 
 const AuthState = {
@@ -88,7 +87,8 @@ const AuthState = {
 type AuthState = EnumValue<typeof AuthState>
 ```
 
-Validate untrusted strings with `isEnumValue(AuthState, value)`. No TypeScript `enum` (`erasableSyntaxOnly`).
+Validate untrusted strings with `isEnumValue(AuthState, value)`. No TypeScript `enum`
+(`erasableSyntaxOnly`).
 
 ## Comments
 

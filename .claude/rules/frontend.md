@@ -5,8 +5,8 @@ paths:
 
 # Frontend conventions
 
-- **`src/api/client.ts` is the API wrapper** (`apiFetch`, `apiPost`, …): it adds `credentials: 'include'`, the CSRF header and `ApiError` handling. Only `src/api/*` and `src/auth/urls.ts` build URLs with `apiUrl()`, which respects `apiBaseUrl` from `config.json`. Components get URLs from helpers there (`providerLoginUrl`, `logoutUrl`).
-- **One module per backend resource in `src/api/`**, exporting the response types, a `<resource>QueryKey` constant and a `fetch<Resource>` function. Components use them with `useQuery({ queryKey, queryFn })`; don't hand-write query keys or fetch in components.
+- **`src/api/client.ts` is the API wrapper** (`apiFetch`, `apiPost`, …): it adds `credentials: 'include'`, the CSRF header and `ApiError` handling. `apiUrl()` respects `apiBaseUrl` from `config.json`; the URL helpers built on it are `providerLoginUrl` and `logoutUrl` (`src/auth/urls.ts`).
+- **One module per backend resource in `src/api/`**, exporting the response types, a `<resource>QueryKey` constant and a `fetch<Resource>` function. Use them with `useQuery({ queryKey, queryFn })`; don't hand-write query keys.
 - **Mirror the API shape in types**, snake_case fields included (`preparation_time`, `translation_key`). Don't rename fields on the client. Check the response shape in `../recipes-cms` (README, serializers and views) before changing a type.
 - **Never read config at build time.** Environment-specific values belong in `config.json` and `AppConfig` in `src/config.ts`, read through `getConfig()` after `loadConfig()` has run.
 - **Treat 401/403 as "not logged in"**, not as an error to retry. `isLoginRequiredError` (`src/api/errors.ts`) decides this; use it in the `retry` rule for any new top-level query that gates the UI.
