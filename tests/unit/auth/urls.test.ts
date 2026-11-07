@@ -5,9 +5,9 @@ import {
   frontendRootUrl,
   loginNextUrl,
   logoutUrl,
-} from "./urls"
+} from "../../../src/auth/urls"
 
-vi.mock("../config", () => ({ getConfig: () => ({ apiBaseUrl: "https://cms.example" }) }))
+vi.mock("../../../src/config", () => ({ getConfig: () => ({ apiBaseUrl: "https://cms.example" }) }))
 
 function setLocation(path: string) {
   window.history.pushState(null, "", path)
@@ -86,12 +86,12 @@ describe("edge cases", () => {
 
   it("logoutUrl is relative to the origin when apiBaseUrl is configured as same-origin", async () => {
     vi.resetModules()
-    vi.doMock("../config", () => ({ getConfig: () => ({ apiBaseUrl: "" }) }))
-    const mod = await import("./urls")
+    vi.doMock("../../../src/config", () => ({ getConfig: () => ({ apiBaseUrl: "" }) }))
+    const mod = await import("../../../src/auth/urls")
     expect(mod.logoutUrl()).toBe(
       `/admin/logout/?next=${encodeURIComponent(`${window.location.origin}/frontend/`)}`,
     )
-    vi.doUnmock("../config")
+    vi.doUnmock("../../../src/config")
   })
 
   it("loginNextUrl removes every repeated auth_error", () => {

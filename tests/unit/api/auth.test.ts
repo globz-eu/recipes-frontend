@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { fetchAuthProviders } from "./auth"
+import { fetchAuthProviders } from "../../../src/api/auth"
 
-vi.mock("../config", () => ({ getConfig: () => ({ apiBaseUrl: "https://cms.example" }) }))
+vi.mock("../../../src/config", () => ({ getConfig: () => ({ apiBaseUrl: "https://cms.example" }) }))
 
 afterEach(() => vi.unstubAllGlobals())
 
