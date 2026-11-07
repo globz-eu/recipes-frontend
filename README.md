@@ -12,9 +12,22 @@ npm run format
 npm run lint
 npm run build  # outputs dist/
 npm test
+npm run test:e2e
 ```
 
 The local recipes-cms compose setup serves `../recipes-frontend/dist` at `/frontend/`.
+
+### Tests
+
+```bash
+npm test                        # unit tests (vitest, tests/unit)
+npx playwright install chromium # once per machine
+npm run test:e2e                # end-to-end tests (Playwright, tests/e2e)
+```
+
+`npm run test:e2e` builds the app and serves `dist/` with `vite preview` on `E2E_PORT` (default
+`4173`). The CMS API is mocked, so no recipes-cms stack is needed. Parallel worktrees each need
+their own port, e.g. `E2E_PORT=4180 npm run test:e2e`.
 
 ### Dev server target and port
 
