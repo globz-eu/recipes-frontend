@@ -18,19 +18,19 @@ export function DevLoginForm() {
   const queryClient = useQueryClient()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     if (isSubmitting) return
     setIsSubmitting(true)
-    setError(null)
+    setErrorMessage(null)
     try {
       await devLogin({ username, password })
       await queryClient.invalidateQueries({ queryKey: homeQueryKeyPrefix })
     } catch (error) {
-      setError(loginErrorMessage(error))
+      setErrorMessage(loginErrorMessage(error))
     } finally {
       setIsSubmitting(false)
     }
@@ -57,7 +57,7 @@ export function DevLoginForm() {
       <button type="submit" disabled={isSubmitting}>
         Log in
       </button>
-      {error && <p role="alert">{error}</p>}
+      {errorMessage && <p role="alert">{errorMessage}</p>}
     </form>
   )
 }
