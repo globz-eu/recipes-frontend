@@ -1,36 +1,18 @@
-import { getConfig } from '../config'
+import { getConfig } from "../config"
+import { ApiError } from "./errors"
 
 export function apiUrl(path: string): string {
   return `${getConfig().apiBaseUrl}${path}`
 }
 
-export class ApiError extends Error {
-  readonly status: number
-  readonly body: unknown
-
-  constructor(status: number, message: string, body: unknown = null) {
-    super(message)
-    this.name = 'ApiError'
-    this.status = status
-    this.body = body
-  }
-}
-
-// The CMS answers authenticated users without a role with 403 and code "no_access".
-export function isNoAccessError(error: unknown): boolean {
-  if (!(error instanceof ApiError) || error.status !== 403) return false
-  const body = error.body
-  return typeof body === 'object' && body !== null && (body as { code?: unknown }).code === 'no_access'
-}
-
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 
 interface RequestOptions {
   method?: HttpMethod
   body?: unknown
 }
 
-const SAFE_METHODS: ReadonlySet<HttpMethod> = new Set(['GET'])
+const SAFE_METHODS: ReadonlySet<HttpMethod> = new Set(["GET"])
 
 let csrfTokenPromise: Promise<string> | null = null
 
@@ -38,9 +20,9 @@ let csrfTokenPromise: Promise<string> | null = null
 // frontend origin, so the token is fetched from the backend and cached.
 export function getCsrfToken(): Promise<string> {
   if (!csrfTokenPromise) {
-    csrfTokenPromise = fetch(apiUrl('/api/csrf/'), {
-      credentials: 'include',
-      headers: { Accept: 'application/json' },
+    csrfTokenPromise = fetch(apiUrl("/api/csrf/"), {
+      credentials: "include",
+      headers: { Accept: "application/json" },
     })
       .then(async (response) => {
         if (!response.ok) {
@@ -62,8 +44,8 @@ export function resetCsrfToken(): void {
 }
 
 async function parseBody(response: Response): Promise<unknown> {
-  const contentType = response.headers.get('Content-Type') ?? ''
-  if (contentType.includes('application/json')) {
+  const contentType = response.headers.get("Content-Type") ?? ""
+  if (contentType.includes("application/json")) {
     return response.json()
   }
   const text = await response.text()
@@ -72,27 +54,30 @@ async function parseBody(response: Response): Promise<unknown> {
 
 function isCsrfFailure(status: number, body: unknown): boolean {
   if (status !== 403) return false
-  const text = typeof body === 'string' ? body : JSON.stringify(body ?? '')
-  return text.includes('CSRF')
+  const text = typeof body === "string" ? body : JSON.stringify(body ?? "")
+  return text.includes("CSRF")
 }
 
 async function send(path: string, method: HttpMethod, body: unknown): Promise<Response> {
-  const headers: Record<string, string> = { Accept: 'application/json' }
+  const headers: Record<string, string> = { Accept: "application/json" }
   if (!SAFE_METHODS.has(method)) {
-    headers['X-CSRFToken'] = await getCsrfToken()
+    headers["X-CSRFToken"] = await getCsrfToken()
   }
   if (body !== undefined) {
-    headers['Content-Type'] = 'application/json'
+    headers["Content-Type"] = "application/json"
   }
   return fetch(apiUrl(path), {
     method,
-    credentials: 'include',
+    credentials: "include",
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   })
 }
 
-export async function apiRequest<T>(path: string, { method = 'GET', body }: RequestOptions = {}): Promise<T> {
+export async function apiRequest<T>(
+  path: string,
+  { method = "GET", body }: RequestOptions = {},
+): Promise<T> {
   let response = await send(path, method, body)
   let responseBody = await parseBody(response)
 
@@ -104,7 +89,11 @@ export async function apiRequest<T>(path: string, { method = 'GET', body }: Requ
   }
 
   if (!response.ok) {
-    throw new ApiError(response.status, `HTTP ${response.status}: ${response.statusText}`, responseBody)
+    throw new ApiError(
+      response.status,
+      `HTTP ${response.status}: ${response.statusText}`,
+      responseBody,
+    )
   }
 
   return responseBody as T
@@ -115,17 +104,17 @@ export function apiFetch<T>(path: string): Promise<T> {
 }
 
 export function apiPost<T>(path: string, body?: unknown): Promise<T> {
-  return apiRequest<T>(path, { method: 'POST', body })
+  return apiRequest<T>(path, { method: "POST", body })
 }
 
 export function apiPut<T>(path: string, body?: unknown): Promise<T> {
-  return apiRequest<T>(path, { method: 'PUT', body })
+  return apiRequest<T>(path, { method: "PUT", body })
 }
 
 export function apiPatch<T>(path: string, body?: unknown): Promise<T> {
-  return apiRequest<T>(path, { method: 'PATCH', body })
+  return apiRequest<T>(path, { method: "PATCH", body })
 }
 
 export function apiDelete<T = void>(path: string): Promise<T> {
-  return apiRequest<T>(path, { method: 'DELETE' })
+  return apiRequest<T>(path, { method: "DELETE" })
 }

@@ -1,15 +1,15 @@
-import { apiUrl } from '../api/client'
+import { apiUrl } from "../api/client"
 
-export const AUTH_ERROR_PARAM = 'auth_error'
+export const AUTH_ERROR_PARAM = "auth_error"
 
 export const AUTH_ERROR_MESSAGES = {
-  email_missing: 'Your account provider did not share an email address.',
-  email_unverified: 'Please verify your email address with your provider, then try again.',
+  email_missing: "Your account provider did not share an email address.",
+  email_unverified: "Please verify your email address with your provider, then try again.",
   email_in_use:
-    'This email address is already used with a different login method. Use that method to sign in.',
+    "This email address is already used with a different login method. Use that method to sign in.",
   already_signed_in:
-    'You are already signed in with another account or this identity belongs to another user.',
-  login_failed: 'Sign-in failed. Please try again.',
+    "You are already signed in with another account or this identity belongs to another user.",
+  login_failed: "Sign-in failed. Please try again.",
 } as const
 
 export type AuthErrorCode = keyof typeof AUTH_ERROR_MESSAGES
@@ -31,9 +31,13 @@ export function loginNextUrl(): string {
   return url.href
 }
 
+export function providerLoginUrl(loginPath: string): string {
+  return apiUrl(`${loginPath}?next=${encodeURIComponent(loginNextUrl())}`)
+}
+
 // The error code from `?auth_error=`; unknown codes count as `login_failed`.
 export function authErrorFromLocation(): AuthErrorCode | null {
   const code = new URLSearchParams(window.location.search).get(AUTH_ERROR_PARAM)
   if (code === null) return null
-  return Object.hasOwn(AUTH_ERROR_MESSAGES, code) ? (code as AuthErrorCode) : 'login_failed'
+  return Object.hasOwn(AUTH_ERROR_MESSAGES, code) ? (code as AuthErrorCode) : "login_failed"
 }

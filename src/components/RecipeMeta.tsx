@@ -1,4 +1,4 @@
-import type { Recipe } from '../api/recipes'
+import type { Recipe } from "../api/recipes"
 
 function formatMinutes(minutes: number): string {
   const hours = Math.floor(minutes / 60)
@@ -14,13 +14,13 @@ interface RecipeMetaProps {
 export function RecipeMeta({ recipe }: RecipeMetaProps) {
   const items: [string, string][] = []
   if (recipe.number_of_people != null) {
-    items.push(['Serves', String(recipe.number_of_people)])
+    items.push(["Serves", String(recipe.number_of_people)])
   }
   if (recipe.preparation_time != null) {
-    items.push(['Preparation', formatMinutes(recipe.preparation_time)])
+    items.push(["Preparation", formatMinutes(recipe.preparation_time)])
   }
   if (recipe.cooking_time != null) {
-    items.push(['Cooking', formatMinutes(recipe.cooking_time)])
+    items.push(["Cooking", formatMinutes(recipe.cooking_time)])
   }
 
   if (items.length === 0) return null

@@ -1,5 +1,5 @@
-import type { Recipe } from '../api/recipes'
-import { RecipeMeta } from './RecipeMeta'
+import type { Recipe } from "../api/recipes"
+import { RecipeMeta } from "./RecipeMeta"
 
 interface RecipeDetailProps {
   recipe: Recipe
@@ -19,8 +19,8 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
             {recipe.ingredients.map((ingredient, index) => (
               <li key={index}>
                 {[ingredient.quantity, ingredient.unit, ingredient.name]
-                  .filter((part) => part !== null && part !== '')
-                  .join(' ')}
+                  .filter((part) => part !== null && part !== "")
+                  .join(" ")}
               </li>
             ))}
           </ul>

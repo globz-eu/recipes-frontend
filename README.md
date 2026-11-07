@@ -8,8 +8,10 @@ served under `/frontend/`.
 ```bash
 npm ci
 npm run dev    # proxies the API to recipes-cms on http://localhost:8080
+npm run format
 npm run lint
 npm run build  # outputs dist/
+npm test
 ```
 
 The local recipes-cms compose setup serves `../recipes-frontend/dist` at `/frontend/`.
@@ -21,11 +23,11 @@ The local recipes-cms compose setup serves `../recipes-frontend/dist` at `/front
 set them in the shell or in `.env.local` (gitignored). They only configure the dev server and
 never reach the bundle.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `RECIPES_CMS_PORT` | `8080` | `NGINX_HOST_PORT` of a local recipes-cms stack; the proxy targets `http://localhost:<port>`. |
-| `RECIPES_CMS_URL` | unset | Origin of any other backend, e.g. a remote one (`https://cms.example.com`, no path). Takes precedence over `RECIPES_CMS_PORT`, which is then ignored with a warning. |
-| `DEV_SERVER_PORT` | `5173 + (RECIPES_CMS_PORT - 8080)`, or `5173` with `RECIPES_CMS_URL` | Port of the dev server. |
+| Variable           | Default                                                              | Description                                                                                                                                                          |
+| ------------------ | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RECIPES_CMS_PORT` | `8080`                                                               | `NGINX_HOST_PORT` of a local recipes-cms stack; the proxy targets `http://localhost:<port>`.                                                                         |
+| `RECIPES_CMS_URL`  | unset                                                                | Origin of any other backend, e.g. a remote one (`https://cms.example.com`, no path). Takes precedence over `RECIPES_CMS_PORT`, which is then ignored with a warning. |
+| `DEV_SERVER_PORT`  | `5173 + (RECIPES_CMS_PORT - 8080)`, or `5173` with `RECIPES_CMS_URL` | Port of the dev server.                                                                                                                                              |
 
 ```bash
 # .env.local: work against the worktree stack started with `invoke worktree-env --port 8081`
@@ -61,8 +63,8 @@ its `index.html`:
 }
 ```
 
-| Key | Description |
-|-----|-------------|
+| Key          | Description                                                                                          |
+| ------------ | ---------------------------------------------------------------------------------------------------- |
 | `apiBaseUrl` | Base URL of the recipes-cms backend, without trailing slash. Empty when served from the same origin. |
 
 [public/config.json](public/config.json) holds the same-origin defaults; deployments overwrite it.
