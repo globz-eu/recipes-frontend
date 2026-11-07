@@ -43,8 +43,13 @@ function readOrigin(env: Record<string, string>, name: string) {
   } catch {
     throw fail()
   }
-  const bare = url.pathname === "/" && !url.search && !url.hash
-  if (!["http:", "https:"].includes(url.protocol) || !bare || url.username || url.password) {
+  const isBareOrigin = url.pathname === "/" && !url.search && !url.hash
+  if (
+    !["http:", "https:"].includes(url.protocol) ||
+    !isBareOrigin ||
+    url.username ||
+    url.password
+  ) {
     throw fail()
   }
   return url.origin

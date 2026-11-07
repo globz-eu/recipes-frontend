@@ -19,12 +19,12 @@ export function DevLoginForm() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    if (submitting) return
-    setSubmitting(true)
+    if (isSubmitting) return
+    setIsSubmitting(true)
     setError(null)
     try {
       await devLogin({ username, password })
@@ -32,7 +32,7 @@ export function DevLoginForm() {
     } catch (err) {
       setError(loginErrorMessage(err))
     } finally {
-      setSubmitting(false)
+      setIsSubmitting(false)
     }
   }
 
@@ -54,7 +54,7 @@ export function DevLoginForm() {
         value={password}
         onChange={(event) => setPassword(event.target.value)}
       />
-      <button type="submit" disabled={submitting}>
+      <button type="submit" disabled={isSubmitting}>
         Log in
       </button>
       {error && <p role="alert">{error}</p>}
