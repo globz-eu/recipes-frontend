@@ -37,10 +37,11 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: E2E tests
+        id: e2e
         run: npm run test:e2e
 
       - name: Upload Playwright report
-        if: failure()
+        if: failure() && steps.e2e.outcome == 'failure'
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report
