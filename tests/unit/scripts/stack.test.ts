@@ -1,6 +1,14 @@
 // @vitest-environment node
 import { spawnSync } from "node:child_process"
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync } from "node:fs"
+import {
+  copyFileSync,
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+  mkdirSync,
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
@@ -9,6 +17,8 @@ const repoRoot = resolve(__dirname, "../../..")
 const stackScript = join(repoRoot, "scripts/stack.sh")
 
 let workDir: string
+// A copy of stack.sh under workDir, so the real checkout's dist is never touched.
+let repo: string
 
 // The fake dev-stack.sh records its arguments and the directory it was called from.
 function createFakeInfra(parent: string): string {
@@ -22,7 +32,7 @@ function createFakeInfra(parent: string): string {
 }
 
 function runStack(args: string[], environment: Record<string, string> = {}) {
-  return spawnSync("sh", [stackScript, ...args], {
+  return spawnSync("sh", [join(repo, "scripts/stack.sh"), ...args], {
     encoding: "utf8",
     env: {
       PATH: process.env.PATH,
@@ -38,6 +48,9 @@ function recordedLines(): string[] {
 
 beforeEach(() => {
   workDir = mkdtempSync(join(tmpdir(), "stack-test-"))
+  repo = join(workDir, "repo")
+  mkdirSync(join(repo, "scripts"), { recursive: true })
+  copyFileSync(stackScript, join(repo, "scripts/stack.sh"))
 })
 
 afterEach(() => {
@@ -65,7 +78,7 @@ describe("stack.sh mode mapping", () => {
       "--skip-lookup",
       "FRONTEND_VERSION",
       "-f",
-      join(repoRoot, "compose.dist.yml"),
+      join(repo, "compose.dist.yml"),
       "--build",
     ])
   })
@@ -83,7 +96,7 @@ describe("stack.sh mode mapping", () => {
 
     runStack(["down"], { RECIPES_INFRA_DIR: infra })
 
-    expect(recordedLines()[0]).toBe(repoRoot)
+    expect(recordedLines()[0]).toBe(repo)
   })
 
   it("rejects an unknown mode and a missing mode", () => {
@@ -102,12 +115,10 @@ describe("stack.sh mode mapping", () => {
 describe("stack.sh dist directory", () => {
   it("creates dist before handing over to dev-stack.sh", () => {
     const infra = createFakeInfra(workDir)
-    const hasDist = existsSync(join(repoRoot, "dist"))
 
     runStack(["dist"], { RECIPES_INFRA_DIR: infra })
 
-    expect(existsSync(join(repoRoot, "dist"))).toBe(true)
-    if (!hasDist) rmSync(join(repoRoot, "dist"), { recursive: true })
+    expect(existsSync(join(repo, "dist"))).toBe(true)
   })
 })
 
