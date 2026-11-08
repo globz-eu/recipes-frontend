@@ -15,7 +15,28 @@ npm test
 npm run test:e2e
 ```
 
-The local recipes-cms compose setup serves `../recipes-frontend/dist` at `/frontend/`.
+### Local dev stack
+
+The backend runs from the dev stack of [recipes-infrastructure](https://github.com/globz-eu/recipes-infrastructure)
+(see its README, "Local dev environment"). Clone it next to this repository, or set
+`RECIPES_INFRA_DIR` (shell or `.env`, gitignored) to its checkout. The `stack:*` scripts run its
+`scripts/dev-stack.sh` for this checkout, which identifies the stack through its `.env`.
+
+```bash
+npm run stack:up     # base stack with the released frontend at http://localhost:8080/frontend/
+npm run stack:dist   # same stack, but ./dist is served at /frontend/ (mode 2)
+npm run build:watch  # rebuild ./dist on every change (second terminal, for stack:dist)
+npm run stack:down   # stop it (add `-- -v` to drop the volumes)
+npm run stack:env -- --port 8081 --source ../recipes-cms/.env  # .env for an extra stack
+```
+
+Two ways to try changes against the stack:
+
+1. **Dev server** (`npm run dev`): Vite with hot reload proxies the API to the stack (see below).
+   Start the stack with `npm run stack:up`; the released frontend it serves is unused.
+2. **Built `dist/`**: `npm run stack:dist` serves your build through the stack's nginx, with the
+   same origin as production. It creates `dist/` first and mounts it read-only, so run
+   `npm run build:watch` (or `npm run build` once) to fill it.
 
 ### Tests
 

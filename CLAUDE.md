@@ -15,6 +15,10 @@ npm run lint    # eslint . --max-warnings 0 && prettier --check .
 npm run format  # prettier --write . (run before lint)
 npm run build   # tsc -b && vite build -> dist/
 npm test        # vitest run (jsdom + Testing Library; config in vitest.config.ts, tests in tests/unit)
+npm run build:watch  # vite build --watch, keeps dist/ current for stack:dist
+npm run stack:up    # recipes-infrastructure dev stack (scripts/stack.sh up), released frontend
+npm run stack:dist  # same stack serving ./dist at /frontend/ (compose.dist.yml)
+npm run stack:down  # stop it; stack:env -- --port N writes .env for an extra stack
 npm run test:e2e  # playwright test: builds, serves dist/ on E2E_PORT (default 4173); config in playwright.config.ts, specs in tests/e2e
 ```
 
@@ -24,7 +28,7 @@ Tests are vitest files in `tests/unit/**/*.test.{ts,tsx}`, mirroring `src/` (set
 
 ## Architecture
 
-React 19 + TypeScript + Vite + TanStack Query, a thin client for the sibling `../recipes-cms` Django/Wagtail API (see its README for endpoints). The app is built with `base: '/frontend/'`; the local recipes-cms compose setup downloads the latest GitHub release into a volume and serves it at `/frontend/` (use `npm run dev` against that compose backend to try unreleased changes).
+React 19 + TypeScript + Vite + TanStack Query, a thin client for the sibling `../recipes-cms` Django/Wagtail API (see its README for endpoints). The app is built with `base: '/frontend/'`; the local dev stack (recipes-infrastructure `dev/compose.yml`, run by `scripts/stack.sh`; infra checkout from `RECIPES_INFRA_DIR` or the sibling `../recipes-infrastructure`) serves the latest GitHub release at `/frontend/`, or with `npm run stack:dist` this checkout's `dist/` (mode 2); `npm run dev` against that stack tries unreleased changes with hot reload (mode 1).
 
 - **Runtime config, not build-time**: `loadConfig()` in `src/config.ts` fetches `config.json` from next to `index.html` at startup, so one build deploys anywhere. `public/config.json` holds same-origin defaults (`apiBaseUrl: ""`); deployments overwrite it. `getConfig()` throws if called before `loadConfig()`.
 - **API layer** (`src/api/`): `client.ts` wraps `fetch` with `credentials: 'include'` (auth is Django session cookies, cross-origin in production). Unsafe methods get an `X-CSRFToken` header fetched from `/api/csrf/` and cached, because the cookie belongs to the backend host and can't be read here; a 403 mentioning CSRF refreshes the token and retries once. Non-2xx responses throw `ApiError` (defined with `isNoAccessError` and `isLoginRequiredError` in `src/api/errors.ts`) with `status` and `body`. Per-resource modules (`home.ts`, `recipes.ts`) hold the response types and fetchers.
