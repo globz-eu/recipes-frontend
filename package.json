@@ -10,6 +10,11 @@
     "lint": "eslint . --max-warnings 0 && prettier --check .",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "build:watch": "tsc -b && vite build --watch",
+    "stack:up": "sh scripts/stack.sh up",
+    "stack:dist": "sh scripts/stack.sh dist",
+    "stack:down": "sh scripts/stack.sh down",
+    "stack:env": "sh scripts/stack.sh env",
     "preview": "vite preview",
     "format": "prettier --write ."
   },
