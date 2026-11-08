@@ -55,3 +55,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "$GITHUB_REF_NAME" "recipes-frontend-${GITHUB_REF_NAME}.tar.gz" --title "$GITHUB_REF_NAME" --generate-notes
+
+      - name: Trigger e2e tests in recipes-infrastructure
+        env:
+          GH_TOKEN: ${{ secrets.E2E_DISPATCH_TOKEN }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: >-
+          gh api repos/globz-eu/recipes-infrastructure/dispatches
+          -f event_type=component-released
+          -f "client_payload[repo]=$REPO_NAME"
+          -f "client_payload[version]=$GITHUB_REF_NAME"

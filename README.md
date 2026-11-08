@@ -113,6 +113,9 @@ npm version patch   # bumps package.json and tags vX.Y.Z
 git push --follow-tags
 ```
 
+After creating the release, CI dispatches the dev-stack e2e tests in recipes-infrastructure; this needs
+the repository secret `E2E_DISPATCH_TOKEN` (fine-grained PAT, contents write on recipes-infrastructure).
+
 ## License
 
 [MIT](LICENSE)
