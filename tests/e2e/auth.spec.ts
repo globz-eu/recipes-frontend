@@ -43,6 +43,19 @@ test.describe("login", () => {
     expect(cms.loginPosts[0].get("next")).toBe(baseURL)
   })
 
+  test("shows login_failed inline and stays on the page when the token request fails", async ({
+    page,
+    cms,
+    baseURL,
+  }) => {
+    await page.route("**/api/csrf/", (route) => route.fulfill({ status: 500, json: {} }))
+    await page.goto("")
+    await page.getByRole("button", { name: "Auth0" }).click()
+    await expect(page.getByRole("alert")).toHaveText("Sign-in failed. Please try again.")
+    await expect(page).toHaveURL(baseURL ?? "")
+    expect(cms.loginPosts).toHaveLength(0)
+  })
+
   test("shows a refused login and drops auth_error from the URL", async ({ page, baseURL }) => {
     await page.goto("?auth_error=email_in_use")
     await expect(page.getByRole("alert")).toHaveText(
