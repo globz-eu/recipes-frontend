@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { devLogin, fetchAuthProviders, forgetSession } from "../../../src/api/auth"
+import {
+  devLogin,
+  fetchAuthProviders,
+  fetchFreshCsrfToken,
+  forgetSession,
+} from "../../../src/api/auth"
 import { apiPost, resetCsrfToken } from "../../../src/api/client"
 import { jsonResponse } from "../support/fixtures"
 
@@ -105,5 +110,26 @@ describe("forgetSession", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(3)
     expect(fetchMock.mock.calls[2][1].headers["X-CSRFToken"]).toBe("token-1")
+  })
+})
+
+describe("fetchFreshCsrfToken", () => {
+  it("fetches a new token even when one is cached", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ csrfToken: "token-1" }))
+      .mockResolvedValueOnce(jsonResponse({}))
+      .mockResolvedValueOnce(jsonResponse({ csrfToken: "token-2" }))
+    vi.stubGlobal("fetch", fetchMock)
+    await apiPost("/x", {})
+
+    await expect(fetchFreshCsrfToken()).resolves.toBe("token-2")
+    expect(fetchMock.mock.calls[2][0]).toBe("https://cms.example/api/csrf/")
+  })
+
+  it("rejects when the token request fails", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ detail: "boom" }, 500)))
+
+    await expect(fetchFreshCsrfToken()).rejects.toMatchObject({ status: 500 })
   })
 })
