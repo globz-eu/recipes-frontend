@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from "react"
+import { useEffect, useRef, useState, type FormEvent } from "react"
 import { fetchFreshCsrfToken, type AuthProvider } from "../api/auth"
 import { AUTH_ERROR_MESSAGES, loginNextUrl, providerLoginAction } from "../auth/urls"
 import type { EnumValue } from "../enum"
@@ -16,6 +16,16 @@ export function ProviderLoginForm({ provider }: { provider: AuthProvider }) {
   const tokenInputRef = useRef<HTMLInputElement>(null)
   const [submitState, setSubmitState] = useState<SubmitState>(SubmitState.Idle)
 
+  // Stays disabled while the navigation is pending; only a page restored from the
+  // back-forward cache keeps its state and needs the button back.
+  useEffect(() => {
+    function enableForRestoredPage(event: PageTransitionEvent) {
+      if (event.persisted) setSubmitState(SubmitState.Idle)
+    }
+    window.addEventListener("pageshow", enableForRestoredPage)
+    return () => window.removeEventListener("pageshow", enableForRestoredPage)
+  }, [])
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (submitState === SubmitState.FetchingToken) return
@@ -25,8 +35,6 @@ export function ProviderLoginForm({ provider }: { provider: AuthProvider }) {
       const token = await fetchFreshCsrfToken()
       if (tokenInputRef.current) tokenInputRef.current.value = token
       form.submit()
-      // Re-enabled for a page restored from the back-forward cache.
-      setSubmitState(SubmitState.Idle)
     } catch {
       setSubmitState(SubmitState.Failed)
     }

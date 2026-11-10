@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { getCsrfToken, resetCsrfToken } from "../../../src/api/client"
 import { AUTH_ERROR_MESSAGES } from "../../../src/auth/urls"
@@ -11,6 +11,12 @@ const provider = { id: "zitadel", label: "Zitadel", login_url: "/login/zitadel/"
 
 function spyOnSubmit() {
   return vi.spyOn(HTMLFormElement.prototype, "submit").mockImplementation(() => undefined)
+}
+
+function restorePageFromCache(isPersisted: boolean) {
+  act(() => {
+    window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: isPersisted }))
+  })
 }
 
 function renderForm() {
@@ -53,6 +59,7 @@ describe("ProviderLoginForm", () => {
     await waitFor(() => expect(submit).toHaveBeenCalledTimes(1))
     expect(new FormData(form).get("csrfmiddlewaretoken")).toBe("token-1")
 
+    restorePageFromCache(true)
     await waitFor(() => expect(button).toBeEnabled())
     fireEvent.click(button)
     await waitFor(() => expect(submit).toHaveBeenCalledTimes(2))
@@ -117,5 +124,32 @@ describe("ProviderLoginForm double click", () => {
 
     await waitFor(() => expect(submit).toHaveBeenCalledTimes(1))
     expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe("ProviderLoginForm after submit", () => {
+  async function submitForm() {
+    stubFetch(jsonResponse({ csrfToken: "t" }))
+    const submit = spyOnSubmit()
+    const { button } = renderForm()
+    fireEvent.click(button)
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(1))
+    return button
+  }
+
+  it("keeps the button disabled while the navigation is pending", async () => {
+    const button = await submitForm()
+
+    expect(button).toBeDisabled()
+    restorePageFromCache(false)
+    expect(button).toBeDisabled()
+  })
+
+  it("enables the button again for a page restored from the back-forward cache", async () => {
+    const button = await submitForm()
+
+    restorePageFromCache(true)
+
+    expect(button).toBeEnabled()
   })
 })
