@@ -77,7 +77,9 @@ describe("ProviderLoginForm", () => {
     resolveToken(jsonResponse({ csrfToken: "t" }))
     await waitFor(() => expect(submit).toHaveBeenCalledTimes(1))
   })
+})
 
+describe("ProviderLoginForm token failure", () => {
   it("shows login_failed and does not submit when the token request fails", async () => {
     stubFetch(jsonResponse({ detail: "boom" }, 500))
     const submit = spyOnSubmit()
@@ -88,5 +90,32 @@ describe("ProviderLoginForm", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(AUTH_ERROR_MESSAGES.login_failed)
     expect(submit).not.toHaveBeenCalled()
     expect(button).toBeEnabled()
+  })
+  it("clears the error and submits when a retry gets a token", async () => {
+    stubFetch(jsonResponse({ detail: "boom" }, 500), jsonResponse({ csrfToken: "token-1" }))
+    const submit = spyOnSubmit()
+    const { button, form } = renderForm()
+
+    fireEvent.click(button)
+    expect(await screen.findByRole("alert")).toBeInTheDocument()
+    fireEvent.click(button)
+
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(1))
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+    expect(new FormData(form).get("csrfmiddlewaretoken")).toBe("token-1")
+  })
+})
+
+describe("ProviderLoginForm double click", () => {
+  it("starts a single token request when clicked twice quickly", async () => {
+    const fetchMock = stubFetch(jsonResponse({ csrfToken: "t" }))
+    const submit = spyOnSubmit()
+    const { button } = renderForm()
+
+    fireEvent.click(button)
+    fireEvent.click(button)
+
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(1))
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 })
