@@ -5,6 +5,7 @@ import {
   frontendRootUrl,
   loginNextUrl,
   logoutUrl,
+  providerLoginAction,
   providerLoginUrl,
 } from "../../../src/auth/urls"
 
@@ -123,5 +124,12 @@ describe("providerLoginUrl", () => {
     setLocation("/frontend/?auth_error=login_failed&x=1")
     const url = new URL(providerLoginUrl("/login/zitadel/"))
     expect(url.searchParams.get("next")).toBe(`${window.location.origin}/frontend/?x=1`)
+  })
+})
+
+describe("providerLoginAction", () => {
+  it("prefixes the backend without a query string", () => {
+    setLocation("/frontend/?x=1#recipe-en-foo")
+    expect(providerLoginAction("/login/zitadel/")).toBe("https://cms.example/login/zitadel/")
   })
 })
