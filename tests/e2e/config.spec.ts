@@ -33,9 +33,11 @@ test.describe("apiBaseUrl from config.json", () => {
 
     test("signs in on the configured CMS and returns to the app", async ({ page }) => {
       await page.goto("")
-      const login = page.getByRole("link", { name: "Auth0" })
-      await expect(login).toHaveAttribute("href", /^http:\/\/cms\.test\/login\/auth0\/\?next=/)
-      await login.click()
+      await expect(page.locator("form.provider-login-form")).toHaveAttribute(
+        "action",
+        "http://cms.test/login/auth0/",
+      )
+      await page.getByRole("button", { name: "Auth0" }).click()
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(homePages.en.title)
     })
   })
