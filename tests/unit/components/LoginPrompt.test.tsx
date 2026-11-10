@@ -39,17 +39,21 @@ afterEach(() => {
 })
 
 describe("LoginPrompt provider links", () => {
-  it("renders one link per provider in response order with the encoded next", async () => {
+  it("renders a button per social provider and a link for local, in response order", async () => {
     stubFetch(200, { providers })
     renderWithQuery(<LoginPrompt />)
     const next = encodeURIComponent(`${window.location.origin}/frontend/?x=1#recipe-en-foo`)
-    const links = await screen.findAllByRole("link")
-    expect(links.map((a) => a.textContent)).toEqual(["Zitadel", "Auth0", "Username and password"])
-    expect(links.map((a) => a.getAttribute("href"))).toEqual([
-      `https://cms.example/login/zitadel/?next=${next}`,
-      `https://cms.example/login/auth0_openidconnect/?next=${next}`,
-      `https://cms.example/admin/login/?next=${next}`,
+    const buttons = await screen.findAllByRole("button")
+    expect(buttons.map((button) => button.textContent)).toEqual(["Zitadel", "Auth0"])
+    expect(buttons.map((button) => button.closest("form")?.getAttribute("action"))).toEqual([
+      "https://cms.example/login/zitadel/",
+      "https://cms.example/login/auth0_openidconnect/",
     ])
+    const links = screen.getAllByRole("link")
+    expect(links.map((a) => a.textContent)).toEqual(["Username and password"])
+    expect(links[0]).toHaveAttribute("href", `https://cms.example/admin/login/?next=${next}`)
+    const items = screen.getAllByRole("listitem").map((item) => item.textContent)
+    expect(items).toEqual(["Zitadel", "Auth0", "Username and password"])
   })
 
   it("shows a loading state first", () => {
@@ -63,6 +67,7 @@ describe("LoginPrompt provider links", () => {
     renderWithQuery(<LoginPrompt />)
     expect(await screen.findByRole("alert")).toHaveTextContent("Could not load the login options")
     expect(screen.queryByRole("link")).not.toBeInTheDocument()
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
   })
 
   it("shows a message when no provider is enabled", async () => {
@@ -75,10 +80,14 @@ describe("LoginPrompt provider links", () => {
     stubFetch(200, { providers })
     window.history.pushState(null, "", "/frontend/?auth_error=email_in_use&x=1#h")
     renderWithQuery(<LoginPrompt />)
-    const links = await screen.findAllByRole("link")
-    const next = encodeURIComponent(`${window.location.origin}/frontend/?x=1#h`)
-    expect(links[0]).toHaveAttribute("href", `https://cms.example/login/zitadel/?next=${next}`)
-    expect(links[0].getAttribute("href")).not.toContain("auth_error")
+    const next = `${window.location.origin}/frontend/?x=1#h`
+    const [link] = await screen.findAllByRole("link")
+    expect(link).toHaveAttribute(
+      "href",
+      `https://cms.example/admin/login/?next=${encodeURIComponent(next)}`,
+    )
+    const form = screen.getByRole("button", { name: "Zitadel" }).closest("form") as HTMLFormElement
+    expect(new FormData(form).get("next")).toBe(next)
   })
 })
 
