@@ -20,6 +20,8 @@ interface MockCms {
   session: CmsSession
   // Requests that left the app without a mock; any of them fails the test.
   readonly unmockedRequests: string[]
+  // Form bodies of the POSTs that started a social login.
+  readonly loginPosts: URLSearchParams[]
 }
 
 interface MockContext {
@@ -46,10 +48,30 @@ function fulfillGated(route: Route, context: MockContext, payload: unknown) {
   return route.fulfill({ headers, json: payload })
 }
 
-// Login and logout redirect back to `next`, like the CMS after a provider round trip.
+// Local login and logout redirect back to `next`, like the CMS after a round trip.
 function redirectToNext(route: Route) {
   const next = new URL(route.request().url()).searchParams.get("next") ?? "/"
   return route.fulfill({ status: 302, headers: { Location: next } })
+}
+
+const CSRF_TOKEN = "test-csrf-token"
+
+// Local login is a GET link; social-auth only starts a login on a POST with a valid token.
+function loginRoute(cms: MockCms) {
+  return (route: Route) => {
+    const request = route.request()
+    const isSocial = new URL(request.url()).pathname !== "/admin/login/"
+    if (!isSocial) {
+      cms.session = CmsSession.Editor
+      return redirectToNext(route)
+    }
+    const form = new URLSearchParams(request.postData() ?? "")
+    if (request.method() !== "POST") return route.fulfill({ status: 405 })
+    if (form.get("csrfmiddlewaretoken") !== CSRF_TOKEN) return route.fulfill({ status: 403 })
+    cms.loginPosts.push(form)
+    cms.session = CmsSession.Editor
+    return route.fulfill({ status: 302, headers: { Location: form.get("next") ?? "/" } })
+  }
 }
 
 function isLoginPath(pathname: string) {
@@ -63,19 +85,16 @@ async function routeCmsPaths(page: Page, context: MockContext, apiOrigin: string
   await page.route(onCms("/api/auth/providers/"), (route) =>
     route.fulfill({ headers: corsHeaders(context.appOrigin), json: { providers } }),
   )
+  await page.route(onCms("/api/csrf/"), (route) =>
+    route.fulfill({ headers: corsHeaders(context.appOrigin), json: { csrfToken: CSRF_TOKEN } }),
+  )
   await page.route(onCms("/api/home/"), (route) => {
     const locale = new URL(route.request().url()).searchParams.get("locale")
     const homePage = homePages[locale as keyof typeof homePages]
     return fulfillGated(route, context, homePage ? [homePage] : [])
   })
   await page.route(onCms("/api/recipes/"), (route) => fulfillGated(route, context, recipesByLocale))
-  await page.route(
-    (url) => url.origin === apiOrigin && isLoginPath(url.pathname),
-    (route) => {
-      cms.session = CmsSession.Editor
-      return redirectToNext(route)
-    },
-  )
+  await page.route((url) => url.origin === apiOrigin && isLoginPath(url.pathname), loginRoute(cms))
   await page.route(onCms("/admin/logout/"), (route) => {
     cms.session = CmsSession.Anonymous
     return redirectToNext(route)
@@ -86,7 +105,7 @@ async function routeCmsPaths(page: Page, context: MockContext, apiOrigin: string
 // /frontend/ files and the mocked CMS paths is answered with 501 and recorded.
 async function mockCms(page: Page, appUrl: string, options: MockCmsOptions) {
   const appOrigin = new URL(appUrl).origin
-  const cms: MockCms = { session: options.session, unmockedRequests: [] }
+  const cms: MockCms = { session: options.session, unmockedRequests: [], loginPosts: [] }
   // Registered first, so every later route takes precedence over it.
   await page.route("**/*", (route) => {
     const url = route.request().url()

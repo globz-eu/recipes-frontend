@@ -8,6 +8,10 @@ import {
   providerLoginUrl,
 } from "../auth/urls"
 import { DevLoginForm } from "./DevLoginForm"
+import { ProviderLoginForm } from "./ProviderLoginForm"
+
+// The local provider is Wagtail's login page, which takes a GET; social logins need a POST.
+const LOCAL_PROVIDER_ID = "local"
 
 export function LoginPrompt() {
   // Read once, then drop it from the address bar so a reload or retry starts clean.
@@ -39,7 +43,11 @@ export function LoginPrompt() {
         <ul>
           {providers.data.map((provider) => (
             <li key={provider.id}>
-              <a href={providerLoginUrl(provider.login_url)}>{provider.label}</a>
+              {provider.id === LOCAL_PROVIDER_ID ? (
+                <a href={providerLoginUrl(provider.login_url)}>{provider.label}</a>
+              ) : (
+                <ProviderLoginForm provider={provider} />
+              )}
             </li>
           ))}
         </ul>

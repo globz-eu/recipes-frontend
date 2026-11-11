@@ -1,4 +1,4 @@
-import { apiFetch, apiPost, resetCsrfToken } from "./client"
+import { apiFetch, apiPost, getCsrfToken, resetCsrfToken } from "./client"
 
 export interface AuthProvider {
   id: string
@@ -22,4 +22,10 @@ export async function devLogin(credentials: { username: string; password: string
 // Drops the cached CSRF token; the session changes on logout.
 export function forgetSession(): void {
   resetCsrfToken()
+}
+
+// The token rotates on login, so a cached one may be stale by the time a login form posts.
+export function fetchFreshCsrfToken(): Promise<string> {
+  resetCsrfToken()
+  return getCsrfToken()
 }
