@@ -4,7 +4,8 @@ export const AUTH_ERROR_PARAM = "auth_error"
 
 export const AUTH_ERROR_MESSAGES = {
   email_missing: "Your account provider did not share an email address.",
-  email_unverified: "Please verify your email address with your provider, then try again.",
+  email_unverified:
+    "Please verify your email address with your provider. If you didn't get a verification email, ask an administrator to resend it.",
   email_in_use:
     "This email address is already used with a different login method. Use that method to sign in.",
   already_signed_in:

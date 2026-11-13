@@ -78,6 +78,12 @@ describe("AUTH_ERROR_MESSAGES", () => {
       "login_failed",
     ])
   })
+
+  it("tells unverified users to ask an administrator", () => {
+    expect(AUTH_ERROR_MESSAGES.email_unverified).toBe(
+      "Please verify your email address with your provider. If you didn't get a verification email, ask an administrator to resend it.",
+    )
+  })
 })
 
 describe("edge cases", () => {
